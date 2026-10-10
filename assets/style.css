@@ -1,0 +1,114 @@
+:root{
+  --bg:#f6f3ec;
+  --paper:#fffdf8;
+  --ink:#2a2724;
+  --ink2:#4a4540;
+  --muted:#857d75;
+  --line:#e3ddd2;
+  --accent:#c0562f;
+  --accent-soft:#f5dfd3;
+  --blue:#2f6474;
+  --blue-soft:#dce8eb;
+  --green:#4f7a3a;
+  --green-soft:#e3edda;
+  --yellow-soft:#f6ecc9;
+  --serif:"Noto Serif SC","Source Han Serif SC","Songti SC","STSong","SimSun",serif;
+  --sans:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Noto Sans SC",sans-serif;
+  --mono:Consolas,Menlo,"Courier New",monospace;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0;background:var(--bg);color:var(--ink);
+  font-family:var(--sans);font-size:17px;line-height:1.9;
+}
+.wrap{max-width:720px;margin:0 auto;padding:26px 22px 80px}
+
+.topbar{
+  display:flex;justify-content:space-between;align-items:center;
+  font-size:14px;color:var(--muted);
+  border-bottom:1px solid var(--line);padding-bottom:12px;margin-bottom:44px;
+}
+.topbar a{color:var(--muted);text-decoration:none}
+.topbar a:hover{color:var(--ink)}
+
+.kicker{font-size:14px;color:var(--accent);letter-spacing:.12em;margin:0 0 6px}
+h1{font-family:var(--serif);font-size:34px;line-height:1.35;margin:0 0 22px;font-weight:700}
+.lead{font-size:18px;color:var(--ink2);margin:0 0 36px}
+h2{font-family:var(--serif);font-size:23px;line-height:1.45;margin:52px 0 14px}
+p{margin:0 0 1.1em}
+a{color:var(--blue)}
+strong{font-weight:700;background:linear-gradient(transparent 60%,var(--accent-soft) 0)}
+ul,ol{padding-left:1.3em;margin:0 0 1.2em}
+li{margin-bottom:.45em}
+
+.aside{
+  border-left:3px solid var(--line);padding:2px 0 2px 16px;
+  color:#5d5750;font-size:15.5px;margin:22px 0;
+}
+
+/* 图和演示 */
+.figure{
+  background:var(--paper);border:1px solid var(--line);border-radius:10px;
+  padding:22px;margin:30px 0;
+}
+.figure svg{display:block;width:100%;height:auto}
+.figure svg text{font-family:var(--sans)}
+.cap{font-size:13.5px;color:var(--muted);margin-top:14px;text-align:center;line-height:1.6}
+.demo-title{
+  font-size:13px;color:var(--blue);font-weight:700;letter-spacing:.08em;margin-bottom:14px;
+}
+.demo-title::before{content:"";display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--blue);margin-right:8px;vertical-align:1px}
+
+.btn{
+  font:inherit;font-size:15px;line-height:1.4;
+  border:1px solid var(--ink);background:var(--paper);color:var(--ink);
+  padding:7px 16px;border-radius:6px;cursor:pointer;
+}
+.btn:hover{background:#efe9de}
+.btn.primary{background:var(--ink);color:#fff}
+.btn.primary:hover{background:#45403b}
+.btn:disabled{opacity:.4;cursor:default}
+.btns{display:flex;gap:8px;flex-wrap:wrap;margin:14px 0 0}
+
+.tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}
+.tab{
+  font:inherit;font-size:14.5px;border:1px solid var(--line);background:#f3efe7;color:var(--ink2);
+  padding:5px 14px;border-radius:20px;cursor:pointer;
+}
+.tab.on{background:var(--ink);border-color:var(--ink);color:#fff}
+
+.bubble{padding:10px 14px;border-radius:10px;margin:8px 0;font-size:15.5px;line-height:1.75}
+.bubble .who{display:block;font-size:12px;color:var(--muted);margin-bottom:2px}
+.bubble.me{background:var(--blue-soft);margin-left:40px}
+.bubble.ai{background:#f1ece2;margin-right:40px}
+
+.fade{animation:fade .35s ease}
+@keyframes fade{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+
+.remember{
+  margin:60px 0 0;padding:22px 26px;border-radius:10px;background:var(--ink);color:#f6f3ec;
+}
+.remember .label{font-size:13px;letter-spacing:.18em;color:#d8b7a5}
+.remember p{font-family:var(--serif);font-size:20px;line-height:1.65;margin:6px 0 0}
+
+.pager{display:flex;gap:12px;margin-top:36px;font-size:15px}
+.pager a{
+  flex:1;padding:14px 16px;border:1px solid var(--line);border-radius:8px;
+  text-decoration:none;color:var(--ink);background:var(--paper);
+}
+.pager a:hover{border-color:#cfc6b8}
+.pager a span{display:block;font-size:12px;color:var(--muted)}
+.pager a.next{text-align:right}
+.pager .empty{flex:1}
+
+.mono{font-family:var(--mono)}
+
+@media (max-width:560px){
+  body{font-size:16px}
+  h1{font-size:28px}
+  h2{font-size:21px}
+  .figure{padding:16px}
+  .bubble.me{margin-left:16px}
+  .bubble.ai{margin-right:16px}
+}
