@@ -1,0 +1,111 @@
+---
+title: "RAG 和知识库：让 AI 开卷考试"
+description: "问 AI\"我们公司年假怎么请\"，它答不上来，或者干脆编一个。这很正常，它又没在你们公司上过班。RAG 就是用来解决这个问题的。"
+date: 2026-10-10
+tags: ["AI 白话课", "AI 能做出什么、怎么答得更准"]
+level: 入门
+series: AI 白话课
+order: 5
+kicker: "RAG · 知识库"
+featured: false
+---
+
+## AI 知道的东西，是有边界的
+
+<p>AI 学的东西，都来自训练时看过的那些资料。训练一结束，它的知识就停在了那一天。</p>
+
+<p>所以有两类事情它天然不知道：</p>
+
+<ul>
+<li><b>太新的事。</b>训练之后才发生的新闻、新出的政策。</li>
+<li><b>没公开的事。</b>你们公司的规章制度、产品手册、客户资料，你家孩子学校发的通知。</li>
+</ul>
+
+<p>更麻烦的是，它不知道的时候，常常不会老实说"不知道"，而是凭感觉编一个像模像样的答案出来。这在行内叫"幻觉"。</p>
+
+## 闭卷和开卷
+
+<p>普通的 AI 回答问题，像是<strong>闭卷考试</strong>，全凭脑子里记得的东西。记不清的地方，就容易瞎写。</p>
+
+<p>RAG 的做法，是让 AI <strong>开卷考试</strong>：回答之前，先去你给的资料里翻一翻，找到相关的那几页，看着资料再答。</p>
+
+<p>RAG 这三个字母的全称是 Retrieval-Augmented Generation，直译是"检索增强生成"，很拗口。拆开来就是三步：<b>先找</b>（检索），<b>把找到的递给 AI</b>（增强），<b>AI 照着回答</b>（生成）。</p>
+
+<div class="figure">
+<div class="demo-title">动手试试：问一个公司内部的问题</div>
+<div class="bubble me">我入职刚满一年，能休几天年假？</div>
+<div class="mode" style="margin-top:12px">
+<div class="col">
+<h4>闭卷（普通 AI）</h4>
+<div id="closed" style="font-size:14.5px;line-height:1.7;color:var(--ink2)">点下面的按钮开始</div>
+</div>
+<div class="col">
+<h4>开卷（RAG）</h4>
+<div class="steps">
+<div class="step" id="s1"><span class="n">1</span><div>在公司知识库里找相关的资料
+            <div class="docs">
+<span class="doc">报销流程.pdf</span><span class="doc" id="hit">员工手册-休假.docx</span><span class="doc">考勤制度.pdf</span><span class="doc">团建通知.txt</span>
+</div></div></div>
+<div class="step" id="s2"><span class="n">2</span><div>找到这一段：<i>“入职满 1 年不满 10 年的，年假 5 天；公司另外再给 2 天福利假。”</i></div></div>
+<div class="step" id="s3"><span class="n">3</span><div>照着资料回答：<b>一共 7 天，法定年假 5 天加公司福利假 2 天。</b>出处：《员工手册》休假篇。</div></div>
+</div>
+</div>
+</div>
+<div class="btns"><button class="btn primary" id="go">开始</button></div>
+</div>
+
+<p>左边那个答案不能说全错，法定的确实是 5 天。但它不知道你们公司另外给了福利假，也没告诉你这话是从哪儿来的。右边多翻了一下资料，答案就具体了，还能让你回头去查原文。</p>
+
+## 那"知识库"又是什么
+
+<p>知识库就是你给 AI 准备的那堆"开卷资料"。</p>
+
+<p>很多 AI 产品都有这个功能，名字可能叫知识库、资料库、项目文件，意思差不多。你把文档传上去，以后问问题，AI 就会先在这堆文档里找。</p>
+
+<p>它找的方式也挺聪明，不是简单地搜关键词。你问"能休几天假"，文档里写的是"年休假天数"，字面不一样，它也能对上，因为它比的是<strong>意思像不像</strong>。</p>
+
+## 能用在哪儿
+
+<ul>
+<li><b>公司里：</b>新员工有问题，问知识库机器人，不用老去打扰同事。</li>
+<li><b>客服：</b>把产品说明书、常见问题放进去，AI 客服回答就有依据了。</li>
+<li><b>自己用：</b>把一摞读书笔记、合同、说明书传上去，以后要找什么，直接问。</li>
+</ul>
+
+## 别指望它百分之百准
+
+<p>开卷考试也有考不好的时候：</p>
+
+<ul>
+<li><b>资料本身有问题，它也跟着错。</b>手册三年没更新，它就照着三年前的规定答。</li>
+<li><b>翻错了页。</b>找来的资料不对路，答案也就歪了。</li>
+<li><b>资料里压根没有，它可能还是会编。</b>好的系统会让它老实说"资料里没找到"，但不是每个都做得好。</li>
+</ul>
+
+<p>所以看 AI 的回答时，养成一个习惯：<strong>看它给的出处</strong>，重要的事点进原文核对一下。</p>
+
+<div class="aside">往知识库里传文件之前，想一想这些资料能不能给外人看。传到网上的 AI 产品，就等于交给了别人的服务器。公司的机密资料，一般要用公司自己部署的系统。</div>
+
+<div class="remember">
+<div class="label">记住这一句</div>
+<p>知识库是给 AI 准备的参考资料，RAG 是让它先翻资料再回答。闭卷变开卷，瞎编就少了。</p>
+</div>
+
+<style>.prose .mode{display:grid;grid-template-columns:1fr 1fr;gap:14px}@media (max-width:560px){.prose .mode{grid-template-columns:1fr}}.prose .col{border:1px solid var(--line);border-radius:8px;padding:12px 14px;background:#fff}.prose .col h4{margin:0 0 8px;font-size:14.5px}.prose .steps{display:flex;flex-direction:column;gap:8px}.prose .step{display:flex;gap:10px;align-items:flex-start;font-size:14.5px;line-height:1.65;opacity:.25;transition:opacity .4s}.prose .step.on{opacity:1}.prose .step .n{flex:none;width:22px;height:22px;border-radius:50%;background:var(--ink);color:#fff;font-size:12px;text-align:center;line-height:22px;margin-top:2px}.prose .docs{display:flex;gap:6px;flex-wrap:wrap;margin:4px 0}.prose .doc{font-size:12.5px;padding:4px 8px;border:1px solid var(--line);border-radius:4px;background:#faf7f0;transition:all .3s}.prose .doc.hit{background:var(--yellow-soft);border-color:#d9b84a;font-weight:600}
+</style>
+
+<script>
+const go = document.getElementById('go');
+go.onclick = ()=>{
+  go.disabled = true;
+  ['s1','s2','s3'].forEach(id=>document.getElementById(id).classList.remove('on'));
+  document.getElementById('hit').classList.remove('hit');
+  const c = document.getElementById('closed');
+  c.textContent = '思考中……';
+  setTimeout(()=>{ c.innerHTML = '一般来说，按照国家规定，工作满 1 年不满 10 年的，年休假 5 天。<br><span style="color:#b04a2a;font-size:13px">（没提公司福利假，也没说依据哪份文件）</span>'; }, 900);
+  setTimeout(()=>document.getElementById('s1').classList.add('on'), 400);
+  setTimeout(()=>document.getElementById('hit').classList.add('hit'), 1100);
+  setTimeout(()=>document.getElementById('s2').classList.add('on'), 1700);
+  setTimeout(()=>{ document.getElementById('s3').classList.add('on'); go.disabled=false; go.textContent='再看一遍'; }, 2500);
+};
+</script>

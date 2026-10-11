@@ -1,0 +1,123 @@
+---
+title: "Token：AI 是一块一块读字的"
+description: "用 AI 的时候，你可能见过\"本次消耗 1200 tokens\"\"超出 token 上限\"这种提示。这个 token 到底是什么？"
+date: 2026-10-10
+tags: ["AI 白话课", "跟 AI 打交道的基本功"]
+level: 入门
+series: AI 白话课
+order: 2
+kicker: "TOKEN · 词元"
+featured: true
+---
+
+## 先说结论
+
+<p>Token 就是 AI 读文字时切出来的<strong>一小块</strong>。</p>
+
+<p>我们读书是一个字一个字地看。AI 不是。它先把一句话切成一块一块，每块可能是一个字，可能是一个词，也可能是半个英文单词。切出来的每一块，就叫一个 token。</p>
+
+<p>打个比方：一整根甘蔗没法直接嚼，得先砍成一节一节的。Token 就是那一节一节的甘蔗。</p>
+
+<div class="figure">
+<div class="demo-title">看看 AI 眼里的一句话</div>
+<div class="tabs" id="tabs"></div>
+<div class="chips" id="chips"></div>
+<div class="count" id="cnt"></div>
+<div class="cap">每个色块是一个 token。这里是示意，真实切法每家模型都不太一样</div>
+</div>
+
+<p>可以看到几个特点：</p>
+
+<ul>
+<li>常见的词，比如"你好""今天"，往往一整块就切下来了。</li>
+<li>不常见的字、生僻的词，可能会被切得更碎。</li>
+<li>英文单词短的一块，长的会被拆开，比如 unbelievable 可能被拆成 un、believ、able。</li>
+<li>标点、空格也算，也占地方。</li>
+</ul>
+
+## 那一个汉字算几个 token？
+
+<p>没有固定答案，跟用的哪家模型有关。现在国内外的主流模型，大致可以按<strong>一个汉字一个 token 上下</strong>来估，有的模型更省一点，有的更费一点。英文差不多是一个单词一个多 token。</p>
+
+<p>平时不用算这么细，有个大概印象就行。下面这个框可以粗略估一下：</p>
+
+<div class="figure">
+<div class="demo-title">粗略估一下</div>
+<textarea id="ta">今天下午三点在三楼会议室开会，请大家准时参加，带上上周的销售数据。</textarea>
+<div class="est">
+<div>字数：<b id="e1">0</b></div>
+<div>大约 token：<b id="e2">0</b></div>
+</div>
+<div class="cap">按"汉字 1 个、英文单词 1.3 个、标点 1 个"粗估，只看个数量级</div>
+</div>
+
+## 为什么要知道这个东西？
+
+<p>因为 AI 世界里，很多事情都拿 token 当"尺子"量。</p>
+
+<p><b>第一，收费按它算。</b>如果你用的是按量付费的 AI 服务，价格表一般写的是"每百万 token 多少钱"。你发过去的字要算钱，它回给你的字也要算钱，通常回的那部分还更贵。就像打车，上车有起步价，跑的每一公里也算钱。</p>
+
+<p><b>第二，能聊多长也按它算。</b>每个 AI 一次能装下的内容有上限，这个上限也是用 token 来数的。这就是下一篇要讲的"上下文窗口"。</p>
+
+<p><b>第三，它解释了 AI 的一些"怪毛病"。</b>早些时候有个很出名的笑话：问 AI 英文单词 strawberry 里有几个字母 r，它经常答错。原因就在这儿，AI 看到的是 straw 和 berry 这样的块，不是一个个字母，让它数字母，有点像让你隔着包装数饼干。现在的模型在这方面已经好很多了，但这个原理还在。</p>
+
+## 几个常见的数
+
+<p>给你一点体感：</p>
+
+<table>
+<tr><th>内容</th><th>大约多少 token</th></tr>
+<tr><td>一条微信消息</td><td>几十个</td></tr>
+<tr><td>一篇公众号文章（3000 字）</td><td>三千个上下</td></tr>
+<tr><td>一本 20 万字的小说</td><td>二十万个上下</td></tr>
+</table>
+
+<div class="aside">免费版的聊天 AI 一般不会让你直接看到 token 数，但背后是一样在算的。你会遇到"今天额度用完了""对话太长请新开一个"之类的提示，多半就是 token 用得差不多了。</div>
+
+<div class="remember">
+<div class="label">记住这一句</div>
+<p>Token 是 AI 读字的单位，大概一个汉字一个。收多少钱、能读多长，都拿它来算。</p>
+</div>
+
+<style>.prose .chips{display:flex;flex-wrap:wrap;gap:5px;margin:6px 0 4px;min-height:40px}.prose .chip{padding:4px 8px;border-radius:5px;font-size:17px;line-height:1.4;white-space:pre}.prose .c0{background:#f5dfd3}.prose .c1{background:#dce8eb}.prose .c2{background:#e3edda}.prose .c3{background:#f6ecc9}.prose .c4{background:#eadff0}.prose .count{font-size:14px;color:var(--muted)}.prose .count b{color:var(--accent);font-size:18px}.prose textarea{width:100%;font:inherit;font-size:16px;line-height:1.7;border:1px solid var(--line);border-radius:8px;padding:10px 12px;background:#fff;resize:vertical;min-height:84px}.prose .est{display:flex;gap:24px;flex-wrap:wrap;margin-top:10px;font-size:14.5px;color:var(--ink2)}.prose .est b{font-size:20px;color:var(--accent);font-weight:700}.prose table{width:100%;border-collapse:collapse;font-size:15px;margin:10px 0 24px}.prose td,.prose th{border-bottom:1px solid var(--line);padding:9px 6px;text-align:left}.prose th{font-weight:600;color:var(--muted);font-size:13.5px}
+</style>
+
+<script>
+const samples = {
+  '中文': ['今天','天气','真','不错','，','我们','去','公园','散步','吧','。'],
+  '英文': ['The',' weather',' is',' really',' nice',' today','.'],
+  '长单词': ['un','believ','able',' ','straw','berry'],
+  '生僻字': ['饕','餮','这个','词','读作','tāo',' ','tiè']
+};
+const tabs = document.getElementById('tabs');
+Object.keys(samples).forEach((k,i)=>{
+  const b = document.createElement('button');
+  b.className = 'tab' + (i===0?' on':''); b.textContent = k;
+  b.onclick = ()=>{ document.querySelectorAll('#tabs .tab').forEach(x=>x.classList.remove('on')); b.classList.add('on'); show(k); };
+  tabs.appendChild(b);
+});
+function show(k){
+  const arr = samples[k];
+  const box = document.getElementById('chips'); box.innerHTML='';
+  arr.forEach((t,i)=>{
+    const s = document.createElement('span');
+    s.className = 'chip fade c'+(i%5); s.textContent = t;
+    s.style.animationDelay = (i*60)+'ms'; s.style.animationFillMode='both';
+    box.appendChild(s);
+  });
+  document.getElementById('cnt').innerHTML = '一共切成 <b>'+arr.length+'</b> 块，也就是 '+arr.length+' 个 token';
+}
+show('中文');
+
+const ta = document.getElementById('ta');
+function est(){
+  const s = ta.value;
+  const han = (s.match(/[一-鿿]/g)||[]).length;
+  const words = (s.match(/[A-Za-z]+/g)||[]).length;
+  const nums = (s.match(/\d+/g)||[]).length;
+  const punct = (s.match(/[^一-鿿A-Za-z\d\s]/g)||[]).length;
+  document.getElementById('e1').textContent = s.replace(/\s/g,'').length;
+  document.getElementById('e2').textContent = Math.round(han + words*1.3 + nums + punct);
+}
+ta.oninput = est; est();
+</script>

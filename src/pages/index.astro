@@ -1,0 +1,75 @@
+---
+import { u } from '../url';
+import Base from '../layouts/Base.astro';
+import Card from '../components/Card.astro';
+import { SITE } from '../site';
+import { allTutorials } from '../lib';
+const all = await allTutorials();
+const featured = (all.filter(t => t.data.featured).length ? all.filter(t => t.data.featured) : all).slice(0, 3);
+const tags = [...new Set(all.flatMap(t => t.data.tags))];
+---
+<Base>
+<section class="hero wrap">
+  <div class="copy">
+    <p class="case mono rise">CASE FILE · AI</p>
+    <h1 class="rise" style="animation-delay:.08s">我是蜘蛛侦探，<br/><span id="tw">专门调查 <span class="mark">AI</span> 的人。</span><span class="caret" aria-hidden="true"></span></h1>
+    <p class="lead rise" style="animation-delay:.16s">{SITE.tagline}这里收录我写过的 AI 教程与工具笔记：从提示词到 Agent，从本地模型到工作流，每一篇都能照着做出结果。</p>
+    <div class="cta rise" style="animation-delay:.24s"><a class="sd-btn" href={u("/tutorials/")}>开始读教程 →</a><a class="sd-btn ghost" href={u("/about/")}>认识我</a></div>
+    <ul class="social rise" style="animation-delay:.32s">{SITE.socials.map(s => <li><a href={s.url}>{s.name}</a></li>)}</ul>
+  </div>
+  <svg class="web rise" style="animation-delay:.1s" viewBox="0 0 400 400" aria-hidden="true">
+    <g fill="none" stroke="#17150F" stroke-width="1.2" opacity=".75">
+      {[0,30,60,90,120,150].map(a => <line x1="200" y1="200" x2={200+190*Math.cos(a*Math.PI/180)} y2={200+190*Math.sin(a*Math.PI/180)} transform-origin="200 200"/>)}
+      {[0,30,60,90,120,150].map(a => <line x1="200" y1="200" x2={200-190*Math.cos(a*Math.PI/180)} y2={200-190*Math.sin(a*Math.PI/180)}/>)}
+      {[40,80,120,160].map(r => <polygon points={Array.from({length:12},(_,i)=>`${200+r*Math.cos(i*Math.PI/6)},${200+r*Math.sin(i*Math.PI/6)}`).join(' ')}/>)}
+    </g>
+    <line class="thread" x1="200" y1="0" x2="200" y2="200" stroke="#17150F" stroke-width="1.5"/>
+    <circle class="pin" cx="200" cy="200" r="16" fill="#F2C230" stroke="#17150F" stroke-width="3"/>
+  </svg>
+</section>
+<section class="wrap block">
+  <a class="series" href={u("/baihuake/")}><span class="mono">SERIES · 10 篇</span><strong>AI 白话课：十个 AI 热词，说人话</strong><span>不讲公式，不堆术语。每篇讲一个词，配一个能点着玩的小演示。</span><em>进入专题 →</em></a>
+</section>
+<section class="wrap block">
+  <div class="head"><h2>从这里开始</h2><a href={u("/tutorials/")} class="more">全部 {all.length} 篇 →</a></div>
+  <div>{featured.map((t, i) => <Card t={t} idx={i + 1}/>)}</div>
+</section>
+<section class="wrap block">
+  <h2>正在调查的线索</h2>
+  <div class="tags">{tags.map(t => <a class="sd-tag" href={u(`/tutorials/?tag=${encodeURIComponent(t)}`)}>{t}</a>)}</div>
+</section>
+</Base>
+<script>
+// 打字机：逐字打出第二行
+const tw = document.getElementById('tw')!;
+if (!matchMedia('(prefers-reduced-motion: reduce)').matches) {
+  const nodes = [...tw.childNodes].map(n => ({ n, text: n.textContent! }));
+  nodes.forEach(o => o.n.textContent = '');
+  let i = 0, k = 0;
+  setTimeout(function step() { if (k >= nodes.length) return; const o = nodes[k]; o.n.textContent = o.text.slice(0, ++i);
+    if (i >= o.text.length) { k++; i = 0; } setTimeout(step, 90 + Math.random() * 70); }, 650);
+}
+</script>
+<style>
+.hero{display:grid;grid-template-columns:1.25fr .9fr;gap:48px;align-items:center;padding-top:72px;padding-bottom:56px}
+.case{font-size:13px;color:var(--ink-3);margin:0 0 20px}
+h1{font-family:var(--serif);font-size:clamp(36px,5.4vw,64px);line-height:1.22;margin:0 0 24px;font-weight:900}
+.mark{background:linear-gradient(transparent 58%,var(--pin) 58%);padding:0 4px}
+.lead{font-size:18px;color:var(--ink-2);max-width:34em;margin:0 0 32px}
+.cta{display:flex;gap:12px;flex-wrap:wrap}
+.social{list-style:none;padding:0;margin:36px 0 0;display:flex;gap:18px;flex-wrap:wrap;font-size:14px}
+.social a{color:var(--ink-3);text-decoration:none;border-bottom:1px dashed var(--line)} .social a:hover{color:var(--ink)}
+.web{width:100%;max-width:420px;justify-self:end}
+.pin{transform-origin:200px 200px;animation:drop .9s .5s cubic-bezier(.34,1.8,.5,1) both}
+.thread{stroke-dasharray:200;animation:draw .6s .3s ease-out both}
+@keyframes drop{from{transform:translateY(-180px) scale(.6)}to{transform:none}}
+@keyframes draw{from{stroke-dashoffset:200}to{stroke-dashoffset:0}}
+.block{margin-top:72px} h2{font-family:var(--serif);font-size:28px;margin:0 0 20px}
+.head{display:flex;justify-content:space-between;align-items:baseline}
+.more{color:var(--ink-2);text-decoration:none;font-size:15px}
+.tags{display:flex;flex-wrap:wrap;gap:10px}
+.series{display:grid;gap:6px;padding:28px 32px;background:var(--ink);color:var(--paper);border-radius:var(--r);text-decoration:none;box-shadow:6px 6px 0 var(--pin);transition:transform .4s var(--spring),box-shadow .3s}
+.series:hover{transform:translate(-2px,-2px);box-shadow:9px 9px 0 var(--pin)} .series .mono{font-size:12px;color:var(--pin)}
+.series strong{font-family:var(--serif);font-size:clamp(22px,3vw,30px)} .series span{color:#CFC8B8} .series em{font-style:normal;color:var(--pin);margin-top:8px}
+@media(max-width:860px){.hero{grid-template-columns:1fr;padding-top:40px}.web{max-width:260px;justify-self:center;order:-1}}
+</style>

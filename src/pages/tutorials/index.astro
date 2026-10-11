@@ -1,0 +1,40 @@
+---
+import Base from '../../layouts/Base.astro';
+import Card from '../../components/Card.astro';
+import { allTutorials } from '../../lib';
+const all = await allTutorials();
+const tags = [...new Set(all.flatMap(t => t.data.tags))];
+---
+<Base title="全部教程">
+<section class="wrap">
+  <h1>全部教程</h1>
+  <p class="sub">共 <span class="mono" id="count">{all.length}</span> 篇。按标签筛选，或直接搜索标题与内容摘要。</p>
+  <input id="q" type="search" placeholder="搜索教程，例如：提示词、Agent、本地部署" aria-label="搜索教程"/>
+  <div class="tags"><button class="sd-tag on" data-tag="">全部</button>{tags.map(t => <button class="sd-tag" data-tag={t}>{t}</button>)}</div>
+  <div id="list">{all.map((t, i) => <Card t={t} idx={all.length - i}/>)}</div>
+  <p id="empty" hidden>没有找到相关教程，换个关键词试试。</p>
+</section>
+</Base>
+<style>
+h1{font-family:var(--serif);font-size:44px;margin:56px 0 8px} .sub{color:var(--ink-2);margin:0 0 28px}
+input{width:100%;font:17px var(--sans);padding:14px 16px;border:1.5px solid var(--ink);border-radius:var(--r);background:#FBF9F4;outline:none;transition:box-shadow .2s}
+input:focus{box-shadow:4px 4px 0 var(--pin)}
+.tags{display:flex;flex-wrap:wrap;gap:8px;margin:18px 0 28px}
+#empty{color:var(--ink-3);padding:40px 0;text-align:center}
+:global(#list .row.hide){display:none}
+</style>
+<script>
+const q = document.getElementById('q') as HTMLInputElement;
+const rows = [...document.querySelectorAll<HTMLElement>('#list .row')];
+const btns = [...document.querySelectorAll<HTMLButtonElement>('.tags .sd-tag')];
+let tag = new URLSearchParams(location.search).get('tag') || '';
+function apply() {
+  const s = q.value.trim().toLowerCase(); let n = 0;
+  rows.forEach(r => { const ok = (!tag || r.dataset.tags!.split(',').includes(tag)) && (!s || r.dataset.text!.includes(s)); r.classList.toggle('hide', !ok); if (ok) n++; });
+  btns.forEach(b => b.classList.toggle('on', b.dataset.tag === tag));
+  document.getElementById('count')!.textContent = String(n);
+  document.getElementById('empty')!.hidden = n > 0;
+}
+btns.forEach(b => b.onclick = () => { tag = b.dataset.tag!; apply(); });
+q.oninput = apply; apply();
+</script>

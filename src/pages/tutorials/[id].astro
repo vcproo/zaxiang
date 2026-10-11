@@ -1,0 +1,120 @@
+---
+import { u } from '../../url';
+import Base from '../../layouts/Base.astro';
+import { render } from 'astro:content';
+import { allTutorials } from '../../lib';
+export async function getStaticPaths() {
+  const all = await allTutorials();
+  return all.map((t, i) => {
+    let prev = all[i + 1], next = all[i - 1], total = 0;
+    if (t.data.series) {
+      const s = all.filter(x => x.data.series === t.data.series).sort((a, b) => (a.data.order ?? 0) - (b.data.order ?? 0));
+      const j = s.findIndex(x => x.id === t.id); prev = s[j - 1]; next = s[j + 1]; total = s.length;
+    }
+    const related = all.filter(x => x.id !== t.id && x.id !== prev?.id && x.id !== next?.id)
+      .map(x => ({ x, n: x.data.tags.filter(g => t.data.tags.includes(g)).length }))
+      .filter(r => r.n > 0).sort((a, b) => b.n - a.n).slice(0, 3).map(r => r.x);
+    return { params: { id: t.id }, props: { t, prev, next, total, related } };
+  });
+}
+const { t, prev, next, total, related } = Astro.props;
+const { Content, headings } = await render(t);
+const toc = headings.filter(h => h.depth === 2);
+const caseNo = t.data.order ? `CASE-${String(t.data.order).padStart(3, '0')}` : 'CASE';
+---
+<Base title={t.data.title} description={t.data.description}>
+<div class="progress" aria-hidden="true"><i class="silkline"></i><span class="pspider">🕷</span></div>
+<article class="wrap grid">
+  <header class="ah">
+    <div class="crumbs mono"><a href={u("/tutorials/")}>← 返回教程列表</a>{t.data.series && <span>{t.data.series} · 第 {t.data.order} 篇 / 共 {total} 篇</span>}</div>
+    {t.data.kicker && <p class="kicker mono">{t.data.kicker}</p>}
+    <h1>{t.data.title}</h1>
+    <p class="desc">{t.data.description}</p>
+    <p class="meta mono">{caseNo} · {t.data.date.toISOString().slice(0,10)} · {t.data.level} · {t.data.tags.map(g => <a href={u(`/tutorials/?tag=${encodeURIComponent(g)}`)}>#{g}</a>)}</p>
+    <div class="stamp" aria-hidden="true"><span>立案调查</span><small class="mono">{caseNo}</small></div>
+  </header>
+  {toc.length > 0 && <aside class="toc"><p class="mono">目录</p>{toc.map(h => <a href={`#${h.slug}`}>{h.text}</a>)}</aside>}
+  <div class="prose"><Content/></div>
+  <nav class="pn">
+    {prev ? <a href={u(`/tutorials/${prev.id}/`)}><span>上一篇</span>{prev.data.title}</a> : <span/>}
+    {next && <a href={u(`/tutorials/${next.id}/`)} class="r"><span>下一篇</span>{next.data.title}</a>}
+  </nav>
+  {related.length > 0 && <section class="board">
+    <h2>关联线索</h2>
+    <div class="cork">
+      <svg class="strings" aria-hidden="true"></svg>
+      <div class="clue me"><b class="mono">本案</b>{t.data.title}</div>
+      {related.map((r, i) => <a class={`clue n${i}`} href={u(`/tutorials/${r.id}/`)}><b class="mono">{r.data.tags.filter(g => t.data.tags.includes(g)).map(g => '#' + g).join(' ')}</b>{r.data.title}</a>)}
+    </div>
+  </section>}
+</article>
+</Base>
+<style>
+.progress{position:fixed;top:60px;left:0;right:0;height:10px;z-index:9;pointer-events:none}
+.silkline{position:absolute;left:0;top:4px;height:1.5px;width:var(--x,0%);background:var(--ink);box-shadow:0 1px 0 rgba(242,194,48,.8)}
+.pspider{position:absolute;top:-5px;left:var(--x,0%);translate:-50% 0;font-size:14px;filter:grayscale(1) brightness(.2)}
+.grid{display:grid;grid-template-columns:minmax(0,720px) 220px;column-gap:56px;row-gap:8px;justify-content:center}
+.ah,.pn,.board{grid-column:1/-1;max-width:1000px;width:100%}
+.ah{position:relative}
+.crumbs{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-top:40px;font-size:13px;color:var(--ink-3)} .crumbs a{color:var(--ink-3);text-decoration:none}
+.kicker{font-size:13px;color:#A8740A;letter-spacing:.12em;margin:28px 0 0}
+h1{font-family:var(--serif);font-size:clamp(30px,4.4vw,46px);line-height:1.28;margin:12px 0 12px;max-width:16em}
+.desc{font-size:19px;color:var(--ink-2);margin:0 0 12px;max-width:36em} .meta{font-size:13px;color:var(--ink-3);padding-bottom:24px;border-bottom:1px solid var(--line)}
+.meta a{margin-left:6px;text-decoration:none}
+.stamp{position:absolute;right:8px;top:70px;border:3px solid var(--string);color:var(--string);padding:6px 14px;border-radius:6px;transform:rotate(-9deg);
+  display:flex;flex-direction:column;align-items:center;font:900 22px/1.1 var(--serif);letter-spacing:.2em;opacity:.85;mix-blend-mode:multiply;
+  animation:stamp .55s .35s cubic-bezier(.3,1.6,.5,1) both}
+.stamp small{font-size:11px;letter-spacing:.1em;font-weight:600}
+@keyframes stamp{0%{opacity:0;transform:rotate(-20deg) scale(2.6)}60%{opacity:.9}100%{opacity:.85;transform:rotate(-9deg) scale(1)}}
+.toc{grid-column:2;grid-row:2;position:sticky;top:90px;align-self:start;display:flex;flex-direction:column;gap:8px;font-size:14px;margin-top:32px}
+.toc p{margin:0 0 4px;color:var(--ink-3);font-size:12px} .toc a{color:var(--ink-2);text-decoration:none;border-left:2px solid transparent;padding-left:10px;transition:all .2s} .toc a:hover,.toc a.cur{color:var(--ink);border-color:var(--pin)}
+.prose{grid-column:1;grid-row:2;font-size:17.5px;line-height:1.85;margin-top:16px}
+.prose :global(h2){font-family:var(--serif);font-size:27px;margin:48px 0 12px;line-height:1.35;scroll-margin-top:80px}
+.prose :global(h3){font-size:20px;margin:32px 0 8px}
+.prose :global(a){text-decoration-color:var(--pin);text-decoration-thickness:2px}
+.prose :global(:not(pre)>code){font-family:var(--mono);font-size:.88em;background:var(--paper-2);padding:2px 6px;border-radius:4px}
+.prose :global(pre){background:var(--ink)!important;color:#EDE8DC;padding:18px 20px;border-radius:var(--r);overflow-x:auto;font-size:14px;line-height:1.65}
+.prose :global(blockquote){margin:24px 0;padding:12px 20px;background:rgba(242,194,48,.18);border-radius:var(--r);color:var(--ink-2)}
+.prose :global(table){border-collapse:collapse;width:100%;font-size:15px} .prose :global(th),.prose :global(td){border-bottom:1px solid var(--line);padding:8px;text-align:left}
+.pn{display:flex;justify-content:space-between;gap:16px;margin-top:56px;padding-top:24px;border-top:1px solid var(--line)}
+.pn a{text-decoration:none;display:flex;flex-direction:column;font-weight:600;max-width:48%} .pn span{font-size:13px;color:var(--ink-3);font-weight:400} .pn .r{text-align:right;margin-left:auto}
+.board{margin-top:64px} .board h2{font-family:var(--serif);font-size:26px;margin:0 0 16px}
+.cork{position:relative;display:grid;grid-template-columns:repeat(4,1fr);gap:28px;padding:36px 28px;border-radius:var(--r);background:#E2D6BC;
+  background-image:radial-gradient(rgba(90,67,0,.12) 1px,transparent 1.4px);background-size:7px 7px}
+.strings{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;overflow:visible;z-index:3}
+.strings :global(path){fill:none;stroke:var(--string);stroke-width:2;stroke-dasharray:var(--len);stroke-dashoffset:var(--len);transition:stroke-dashoffset 1s var(--flow)}
+.cork.drawn .strings :global(path){stroke-dashoffset:0}
+.clue{position:relative;z-index:2;background:#FFFDF6;padding:22px 14px 14px;font-family:var(--serif);font-weight:700;font-size:15.5px;line-height:1.45;text-decoration:none;
+  box-shadow:0 6px 14px rgba(23,21,15,.15);transition:transform .4s var(--spring);display:flex;flex-direction:column;gap:6px}
+.clue b{font-size:11px;color:var(--ink-3);font-weight:400}
+.clue::before{content:"";position:absolute;top:-7px;left:50%;width:14px;height:14px;margin-left:-7px;border-radius:50%;background:var(--string);box-shadow:0 0 0 2px var(--ink)}
+.clue.me{background:var(--pin)} .clue.me::before{background:var(--ink)}
+.n0{transform:rotate(-2deg)} .n1{transform:rotate(1.5deg) translateY(14px)} .n2{transform:rotate(-1deg)} .me{transform:rotate(1deg)}
+a.clue:hover{transform:rotate(0) translateY(-4px) scale(1.03)}
+@media(max-width:900px){.grid{grid-template-columns:minmax(0,1fr)}.toc{display:none}.stamp{position:static;display:inline-flex;margin:4px 0 16px;font-size:16px}
+  .cork{grid-template-columns:1fr 1fr;padding:28px 18px}}
+</style>
+<script>
+const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const bar = document.querySelector('.progress') as HTMLElement, prose = document.querySelector('.prose') as HTMLElement;
+let tk = false;
+function prog() { const r = prose.getBoundingClientRect(); const p = Math.min(1, Math.max(0, (innerHeight * .4 - r.top) / r.height));
+  bar.style.setProperty('--off', String(1 - p)); bar.style.setProperty('--x', (p * 100) + '%'); tk = false;
+  const hs = [...prose.querySelectorAll('h2')]; let cur = ''; hs.forEach(h => { if (h.getBoundingClientRect().top < 120) cur = h.id; });
+  document.querySelectorAll('.toc a').forEach(a => a.classList.toggle('cur', a.getAttribute('href') === '#' + cur)); }
+addEventListener('scroll', () => { if (!tk) { tk = true; requestAnimationFrame(prog); } }, { passive: true }); prog();
+// 红线：把「本案」与关联教程连起来
+const cork = document.querySelector('.cork') as HTMLElement | null;
+if (cork) {
+  const svg = cork.querySelector('.strings') as SVGSVGElement;
+  const draw = () => { const b = cork.getBoundingClientRect(); const pin = (el: Element) => { const r = el.getBoundingClientRect(); return [r.left + r.width / 2 - b.left, r.top - b.top]; };
+    if (!cork.querySelector('.me')) return;
+    const [mx, my] = pin(cork.querySelector('.me')!);
+    svg.innerHTML = [...cork.querySelectorAll('a.clue')].map(n => { const [x, y] = pin(n); const sag = 30 + Math.abs(x - mx) * .08;
+      const d = `M${mx} ${my} Q ${(mx + x) / 2} ${Math.max(my, y) + sag} ${x} ${y}`; return `<path d="${d}" style="--len:${Math.hypot(x - mx, y - my) * 1.6}"/>`; }).join('');
+    svg.querySelectorAll('path').forEach(p => p.style.setProperty('--len', String(p.getTotalLength() + 2))); };
+  draw(); addEventListener('resize', draw);
+  if (reduce) cork.classList.add('drawn');
+  else new IntersectionObserver((es, o) => { if (es[0].isIntersecting) { cork.classList.add('drawn'); o.disconnect(); } }, { threshold: .35 }).observe(cork);
+}
+</script>
