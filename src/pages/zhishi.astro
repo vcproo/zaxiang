@@ -94,7 +94,7 @@ const data = { nodes: placed, edges: EDGES, groups: GROUPS, W, H, CX, CY };
         <span id="hud-sel">—</span>
         <span class="hud-spacer"></span>
         <button type="button" class="hud-btn" id="reset" hidden>RESET</button>
-        <img class="hud-ip" src={u("/ip/avatar-64.png")} width="22" height="22" alt="" decoding="async"/>
+        <img class="hud-ip" src={u("/ip/avatar-64.png")} width="24" height="24" alt="" decoding="async"/>
       </div>
       <canvas id="g" width={W} height={H} aria-label="AI 知识网络图"></canvas>
       <div class="tip" id="tip" hidden></div>
@@ -452,12 +452,12 @@ dirty = true; schedule();
 
 .zh-stage { display: grid; grid-template-columns: minmax(0, 1fr) 240px; gap: 24px; margin-top: 24px; padding-bottom: 48px; align-items: start; }
 .panel { position: relative; border: 1px solid #2A2824; border-radius: 2px; background: #10100E; overflow: hidden; }
-.hud { display: flex; align-items: center; gap: 8px; padding: 8px 12px; border-bottom: 1px solid #24221E;
-  font-size: 10px; letter-spacing: .12em; color: #5E584E; background: #12110F; min-height: 34px; }
+.hud { display: flex; align-items: center; gap: 8px; padding: 7px 12px; border-bottom: 1px solid #24221E;
+  font-size: 10px; letter-spacing: .14em; color: #5E584E; background: linear-gradient(180deg,#141210,#10100E); min-height: 32px; }
 .hud #hud-mode { color: #E8B84A; }
 .hud .sep { opacity: .4; }
 .hud-spacer{flex:1}
-.hud-ip{width:22px;height:22px;border-radius:50%;border:1px solid #3A3630;opacity:.9;object-fit:cover}
+.hud-ip{width:24px;height:24px;border-radius:50%;border:1px solid #3A3630;opacity:.95;object-fit:cover;box-shadow:0 0 0 1px rgba(232,184,74,.2)}
 .hud-btn {  font: inherit; letter-spacing: .12em; font-size: 9px; color: #0C0C0A; background: #E8B84A;
   border: 0; padding: 4px 8px; border-radius: 1px; cursor: pointer; }
 #g { display: block; width: 100%; height: auto; aspect-ratio: 1000 / 720; cursor: grab; touch-action: none; }

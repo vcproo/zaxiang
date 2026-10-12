@@ -1,22 +1,15 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="none">
-  <rect width="32" height="32" rx="6" fill="#F3EBDD"/>
-  <!-- hood silhouette hint -->
-  <path d="M6 22c0-8 4.5-14 10-14s10 6 10 14" fill="#F3EBDD" stroke="#27232D" stroke-width="1.4" stroke-linejoin="round"/>
-  <ellipse cx="16" cy="20" rx="7.2" ry="6.2" fill="#27232D"/>
-  <!-- main eyes -->
-  <ellipse cx="13.2" cy="19.2" rx="2.3" ry="1.7" fill="#C7EFDC"/>
-  <ellipse cx="18.8" cy="19.2" rx="2.3" ry="1.7" fill="#C7EFDC"/>
-  <!-- secondary eyes -->
-  <circle cx="11.4" cy="15.8" r="0.7" fill="#C7EFDC"/>
-  <circle cx="12.8" cy="14.9" r="0.7" fill="#C7EFDC"/>
-  <circle cx="14.4" cy="14.5" r="0.7" fill="#C7EFDC"/>
-  <circle cx="17.6" cy="14.5" r="0.7" fill="#C7EFDC"/>
-  <circle cx="19.2" cy="14.9" r="0.7" fill="#C7EFDC"/>
-  <circle cx="20.6" cy="15.8" r="0.7" fill="#C7EFDC"/>
-  <!-- forehead spider mark -->
-  <g fill="#27232D" transform="translate(16 9.2)">
-    <circle cx="-1.1" cy="0" r="1.05"/>
-    <circle cx="1.1" cy="0.15" r="1.25"/>
-    <path d="M-2.6-1.3 -3.6-2.4M-2.8-.2 -4.2-.4M-2.5 1 -3.5 2.1M-1.6 1.4 -2 2.6M2.6-1.1 3.7-2.2M2.9.1 4.3-.1M2.6 1.2 3.7 2.2M1.7 1.5 2.1 2.7" stroke="#27232D" stroke-width="0.7" stroke-linecap="round"/>
-  </g>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+<rect width="32" height="32" rx="7" fill="#F3EBDD"/>
+<path d="M5.5 23c0-8.2 4.7-14.5 10.5-14.5S26.5 14.8 26.5 23" fill="#F3EBDD" stroke="#27232D" stroke-width="1.5" stroke-linejoin="round"/>
+<ellipse cx="16" cy="20.5" rx="7.4" ry="6.4" fill="#27232D"/>
+<ellipse cx="13" cy="19.6" rx="2.5" ry="1.85" fill="#C7EFDC"/>
+<ellipse cx="19" cy="19.6" rx="2.5" ry="1.85" fill="#C7EFDC"/>
+<g fill="#C7EFDC">
+<circle cx="11.1" cy="16" r=".85"/><circle cx="12.7" cy="15" r=".85"/><circle cx="14.4" cy="14.5" r=".85"/>
+<circle cx="17.6" cy="14.5" r=".85"/><circle cx="19.3" cy="15" r=".85"/><circle cx="20.9" cy="16" r=".85"/>
+</g>
+<g fill="#27232D" transform="translate(16 8.8)">
+<circle cx="-1.15" cy="0" r="1.15"/><circle cx="1.2" cy=".2" r="1.35"/>
+<path d="M-2.7-1.4 -3.8-2.6M-2.9-.15 -4.4-.4M-2.6 1.1 -3.7 2.3M-1.55 1.55 -2 2.85M2.75-1.15 4-2.35M3 .2 4.55 0M2.7 1.3 3.9 2.45M1.7 1.65 2.2 2.95" stroke="#27232D" stroke-width=".75" stroke-linecap="round"/>
+</g>
 </svg>
