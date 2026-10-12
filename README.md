@@ -35,6 +35,10 @@ draft: false       # 可选：true 时不发布
 
 > 当前的 10 篇教程来自仓库 [vcproo/zaxiang](https://github.com/vcproo/zaxiang) 的「AI 白话课」，原文未改动；每篇里的互动小演示以原始 HTML + `<style>` + `<script>` 的形式保留在 Markdown 中（样式统一加了 `.prose` 前缀，避免影响全站）。专题目录页见 `src/pages/baihuake.astro`。
 
+## 知识蛛网
+
+`/zhishi/` 是可交互的知识点蛛网：中心是 AI，内环是白话课十个热词（可进教程），外环是延伸概念。数据在 `src/zhishi.ts`，后续加深只需改这一处。
+
 ## 侦探互动彩蛋
 
 - 首页标题打字机效果；教程条目上悬停出现放大镜（仅鼠标设备）

@@ -4,7 +4,7 @@ import '../styles/global.css';
 import { SITE } from '../site';
 const { title, description = SITE.tagline } = Astro.props;
 const path = Astro.url.pathname.replace(import.meta.env.BASE_URL.replace(/\/$/, ''), '') || '/';
-const nav = [['/', '首页'], ['/tutorials/', '教程'], ['/baihuake/', '白话课'], ['/about/', '关于']];
+const nav = [['/', '首页'], ['/tutorials/', '教程'], ['/baihuake/', '白话课'], ['/zhishi/', '知识网'], ['/about/', '关于']];
 ---
 <html lang="zh-CN"><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
 <title>{title ? `${title} · ${SITE.name}` : `${SITE.name} · AI 教程与笔记`}</title>

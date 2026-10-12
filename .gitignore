@@ -1,6 +1,3 @@
-node_modules/
-dist/
-.astro/
-screenshots/
-*.zip
-.DS_Store
+node_modules
+dist
+.astro

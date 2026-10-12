@@ -30,6 +30,26 @@ const tags = [...new Set(all.flatMap(t => t.data.tags))];
 <section class="wrap block">
   <a class="series" href={u("/baihuake/")}><span class="mono">SERIES · 10 篇</span><strong>AI 白话课：十个 AI 热词，说人话</strong><span>不讲公式，不堆术语。每篇讲一个词，配一个能点着玩的小演示。</span><em>进入专题 →</em></a>
 </section>
+
+<section class="wrap block">
+  <a class="webcard" href={u("/zhishi/")}>
+    <span class="mono">CASE BOARD</span>
+    <strong>知识蛛网</strong>
+    <span>像蜘蛛织网一样，把零散的 AI 知识点连成一张能用的网。点开节点，顺着蛛丝摸到相关的课。</span>
+    <em>打开蛛网 →</em>
+    <svg class="mini" viewBox="0 0 120 120" aria-hidden="true">
+      <g fill="none" stroke="currentColor" stroke-width="1.2" opacity=".7">
+        <circle cx="60" cy="60" r="18"/><circle cx="60" cy="60" r="36"/><circle cx="60" cy="60" r="52"/>
+        <line x1="60" y1="60" x2="60" y2="8"/><line x1="60" y1="60" x2="112" y2="60"/>
+        <line x1="60" y1="60" x2="60" y2="112"/><line x1="60" y1="60" x2="8" y2="60"/>
+        <line x1="60" y1="60" x2="97" y2="23"/><line x1="60" y1="60" x2="97" y2="97"/>
+        <line x1="60" y1="60" x2="23" y2="97"/><line x1="60" y1="60" x2="23" y2="23"/>
+      </g>
+      <circle cx="60" cy="60" r="7" fill="#F2C230" stroke="#17150F" stroke-width="2"/>
+    </svg>
+  </a>
+</section>
+
 <section class="wrap block">
   <div class="head"><h2>从这里开始</h2><a href={u("/tutorials/")} class="more">全部 {all.length} 篇 →</a></div>
   <div>{featured.map((t, i) => <Card t={t} idx={i + 1}/>)}</div>
@@ -71,5 +91,15 @@ h1{font-family:var(--serif);font-size:clamp(36px,5.4vw,64px);line-height:1.22;ma
 .series{display:grid;gap:6px;padding:28px 32px;background:var(--ink);color:var(--paper);border-radius:var(--r);text-decoration:none;box-shadow:6px 6px 0 var(--pin);transition:transform .4s var(--spring),box-shadow .3s}
 .series:hover{transform:translate(-2px,-2px);box-shadow:9px 9px 0 var(--pin)} .series .mono{font-size:12px;color:var(--pin)}
 .series strong{font-family:var(--serif);font-size:clamp(22px,3vw,30px)} .series span{color:#CFC8B8} .series em{font-style:normal;color:var(--pin);margin-top:8px}
+.webcard{position:relative;display:grid;gap:6px;padding:28px 32px;padding-right:140px;background:#E2D6BC;
+  background-image:radial-gradient(rgba(90,67,0,.12) 1px,transparent 1.4px);background-size:7px 7px;
+  color:var(--ink);border:1.5px solid var(--ink);border-radius:var(--r);text-decoration:none;
+  box-shadow:6px 6px 0 var(--pin);transition:transform .4s var(--spring),box-shadow .3s;overflow:hidden}
+.webcard:hover{transform:translate(-2px,-2px);box-shadow:9px 9px 0 var(--pin)}
+.webcard .mono{font-size:12px;color:#A8740A}
+.webcard strong{font-family:var(--serif);font-size:clamp(22px,3vw,30px)}
+.webcard span{color:var(--ink-2);max-width:36em} .webcard em{font-style:normal;color:#A8740A;margin-top:8px}
+.webcard .mini{position:absolute;right:16px;top:50%;translate:0 -50%;width:110px;height:110px;color:var(--ink);opacity:.85}
+@media(max-width:640px){.webcard{padding-right:28px}.webcard .mini{display:none}}
 @media(max-width:860px){.hero{grid-template-columns:1fr;padding-top:40px}.web{max-width:260px;justify-self:center;order:-1}}
 </style>
