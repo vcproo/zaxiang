@@ -1,0 +1,487 @@
+---
+import { u } from '../url';
+import Base from '../layouts/Base.astro';
+import { NODES, EDGES, GROUPS, GROUP_COLOR } from '../zhishi';
+
+/** 有序布局：按分组扇区 + 同心环，乱中有序 */
+const W = 1000, H = 720, CX = W / 2, CY = H / 2;
+const SECTORS: { group: string; start: number; end: number }[] = [
+  { group: '基本功', start: -100, end: -20 },
+  { group: '生成与检索', start: -20, end: 55 },
+  { group: '自主办事', start: 55, end: 160 },
+  { group: '远景', start: 160, end: 210 },
+  { group: '延伸概念', start: 210, end: 260 }, // unused for lessons; concepts use parent sector
+];
+
+function polar(deg: number, r: number) {
+  const a = (deg - 90) * Math.PI / 180;
+  return { x: CX + r * Math.cos(a), y: CY + r * Math.sin(a) };
+}
+function spread(ids: typeof NODES, start: number, end: number, radius: number) {
+  const n = ids.length;
+  return ids.map((node, i) => {
+    const t = n === 1 ? 0.5 : i / (n - 1);
+    const deg = start + (end - start) * t;
+    const { x, y } = polar(deg, radius);
+    return { ...node, x, y, color: GROUP_COLOR[node.group], r: node.kind === 'hub' ? 26 : node.kind === 'lesson' ? 10 : 6.5, href: node.href ? u(node.href) : undefined };
+  });
+}
+
+const hub = NODES.find(n => n.kind === 'hub')!;
+const lessons = NODES.filter(n => n.kind === 'lesson');
+const concepts = NODES.filter(n => n.kind === 'concept');
+
+// 内环：十门课按分组扇区均匀排布（组内等分，组间留缝）
+const lessonPlaced: ReturnType<typeof spread> = [];
+const lessonGroups = ['基本功', '生成与检索', '自主办事', '远景'] as const;
+const gaps = 8; // degrees between sectors
+let cursor = -110;
+const lessonByGroup = lessonGroups.map(g => {
+  const items = lessons.filter(n => n.group === g);
+  const span = Math.max(28, items.length * 22);
+  const start = cursor;
+  const end = cursor + span;
+  cursor = end + gaps;
+  return { g, items, start, end };
+});
+// 归一化到约 300° 扇面，右侧留白给呼吸
+const totalSpan = cursor + 110;
+const scale = 300 / totalSpan;
+lessonByGroup.forEach(({ items, start, end }) => {
+  const s = -110 + (start + 110) * scale;
+  const e = -110 + (end + 110) * scale;
+  lessonPlaced.push(...spread(items, s, e, 210));
+});
+
+// 外环：延伸概念贴在相关课的扇区中点外侧
+const conceptAnchor: Record<string, string> = {
+  prompteng: 'prompt', llm: 'token', multimodal: 'aigc', kb: 'rag',
+  toolcall: 'agent', workflow: 'harness',
+};
+const lessonMap = Object.fromEntries(lessonPlaced.map(n => [n.id, n]));
+const conceptPlaced = concepts.map(c => {
+  const anchor = lessonMap[conceptAnchor[c.id] || ''] || lessonPlaced[0];
+  const dx = anchor.x - CX, dy = anchor.y - CY;
+  const ang = Math.atan2(dy, dx);
+  const r = 318;
+  return {
+    ...c, x: CX + Math.cos(ang) * r, y: CY + Math.sin(ang) * r,
+    color: GROUP_COLOR[c.group], r: 6.5, href: undefined as string | undefined,
+  };
+});
+
+const placed = [
+  { ...hub, x: CX, y: CY, color: GROUP_COLOR[hub.group], r: 26, href: undefined as string | undefined },
+  ...lessonPlaced,
+  ...conceptPlaced,
+];
+
+const data = { nodes: placed, edges: EDGES, groups: GROUPS, W, H, CX, CY };
+---
+<Base title="知识蛛网" description="侦办级 AI 知识网络：分组扇区、同心环布局，乱中有序。">
+<section class="zh">
+  <header class="zh-head wrap">
+    <p class="zh-meta mono"><span>GRAPH</span><span>{NODES.length} NODES</span><span>{EDGES.length} EDGES</span></p>
+    <h1>知识网络</h1>
+    <p class="lead">像蜘蛛织网一样，把零散的 AI 知识点连成一张能用的网。节点按专案分组落在固定扇区——乱中有序；点选一条线索，邻域即亮。</p>
+  </header>
+
+  <div class="zh-stage wrap">
+    <div class="panel" id="panel">
+      <div class="hud mono">
+        <span id="hud-mode">OVERVIEW</span>
+        <span class="sep">/</span>
+        <span id="hud-sel">—</span>
+        <span class="hud-spacer"></span>
+        <button type="button" class="hud-btn" id="reset" hidden>RESET</button>
+        <img class="hud-ip" src={u("/ip/avatar-64.png")} width="24" height="24" alt="" decoding="async"/>
+      </div>
+      <canvas id="g" width={W} height={H} aria-label="AI 知识网络图"></canvas>
+      <div class="tip" id="tip" hidden></div>
+    </div>
+
+    <aside class="dossier">
+      <h2 class="mono">BRIEF</h2>
+      <p>中心 <b>AI</b>。内环为白话课专案（C-01–C-10），按「基本功 → 生成与检索 → 自主办事 → 远景」顺时针展开。外环为延伸概念，落在相关专案外侧。</p>
+      <h2 class="mono">LEGEND</h2>
+      <ul class="legend">
+        {GROUPS.map(g => (
+          <li><i style={`background:${g.color}`}></i><span><b class="mono">{g.id}</b>{g.tip}</span></li>
+        ))}
+      </ul>
+      <h2 class="mono">OPS</h2>
+      <ul class="ops">
+        <li>悬停：邻域高亮</li>
+        <li>单击：聚焦</li>
+        <li>再击：打开教程</li>
+        <li>空白 / RESET：全景</li>
+      </ul>
+      <a class="sd-btn" href={u('/baihuake/')}>按序列阅读白话课 →</a>
+    </aside>
+  </div>
+</section>
+</Base>
+
+<script define:vars={{ data }}>
+const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const canvas = document.getElementById('g');
+const ctx = canvas.getContext('2d', { alpha: false });
+const panel = document.getElementById('panel');
+const tip = document.getElementById('tip');
+const resetBtn = document.getElementById('reset');
+const hudMode = document.getElementById('hud-mode');
+const hudSel = document.getElementById('hud-sel');
+
+const nodes = data.nodes;
+const byId = Object.fromEntries(nodes.map(n => [n.id, n]));
+const edges = data.edges.map(e => ({ ...e, a: byId[e.from], b: byId[e.to] }));
+const adj = {};
+nodes.forEach(n => { adj[n.id] = new Set(); });
+edges.forEach(e => { adj[e.from].add(e.to); adj[e.to].add(e.from); });
+
+// 预计算边长（信号粒子用，默认关闭）
+edges.forEach(e => { e.len = Math.hypot(e.b.x - e.a.x, e.b.y - e.a.y) || 1; });
+
+let cssW = 0, cssH = 0, dpr = 1;
+let view = { x: 0, y: 0, k: 1 };
+let hover = null, focus = null;
+let panning = null, down = null;
+let dirty = true, raf = 0;
+let signalsOn = false; // 默认关闭粒子，聚焦时可选短脉冲
+let pulse = null; // { edges, t0 }
+
+function resize() {
+  const r = canvas.getBoundingClientRect();
+  cssW = r.width; cssH = r.height;
+  dpr = Math.min(1.75, devicePixelRatio || 1);
+  canvas.width = Math.floor(cssW * dpr);
+  canvas.height = Math.floor(cssH * dpr);
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  dirty = true; schedule();
+}
+resize();
+addEventListener('resize', resize, { passive: true });
+
+function nbr(id) { return new Set([id, ...adj[id]]); }
+
+function toWorld(cx, cy) {
+  const r = canvas.getBoundingClientRect();
+  const sx = cssW / data.W, sy = cssH / data.H;
+  return {
+    x: (cx - r.left - view.x) / (view.k * sx),
+    y: (cy - r.top - view.y) / (view.k * sy),
+  };
+}
+function toScreen(wx, wy) {
+  const r = canvas.getBoundingClientRect();
+  const sx = cssW / data.W, sy = cssH / data.H;
+  return { x: r.left + view.x + wx * view.k * sx, y: r.top + view.y + wy * view.k * sy };
+}
+
+function hit(wx, wy) {
+  let best = null, bd = 1e9;
+  for (const n of nodes) {
+    const d = Math.hypot(n.x - wx, n.y - wy);
+    if (d < n.r + 14 && d < bd) { bd = d; best = n; }
+  }
+  return best;
+}
+
+function schedule() {
+  if (raf) return;
+  raf = requestAnimationFrame(frame);
+}
+function frame(now) {
+  raf = 0;
+  const needPulse = pulse && (now - pulse.t0) < 900;
+  if (!dirty && !needPulse) return;
+  draw(now);
+  dirty = false;
+  if (needPulse) schedule();
+}
+
+function setFocus(n) {
+  focus = n;
+  resetBtn.hidden = !n;
+  if (!n) {
+    view = { x: 0, y: 0, k: 1 };
+    hudMode.textContent = 'OVERVIEW';
+    hudSel.textContent = '—';
+    pulse = null;
+  } else {
+    hudMode.textContent = 'FOCUS';
+    hudSel.textContent = `${n.caseId}  ${n.label}`;
+    const sx = cssW / data.W, sy = cssH / data.H;
+    const scale = 1.28;
+    view.k = scale;
+    view.x = cssW / 2 - n.x * scale * sx;
+    view.y = cssH / 2 - n.y * scale * sy;
+    if (!reduce && signalsOn) {
+      pulse = { edges: edges.filter(e => e.from === n.id || e.to === n.id), t0: performance.now() };
+    }
+  }
+  dirty = true; schedule();
+}
+
+function showTip(n, cx, cy) {
+  tip.hidden = false;
+  tip.innerHTML = `<div class="t-id mono">${n.caseId} · ${n.group}</div><div class="t-title">${n.label}</div><div class="t-body">${n.blurb}</div><div class="t-act mono">${n.href ? 'CLICK · OPEN' : 'INTEL ONLY'}</div>`;
+  const br = panel.getBoundingClientRect();
+  let x = cx - br.left + 12, y = cy - br.top + 12;
+  tip.style.transform = `translate(${Math.min(x, br.width - 250)}px, ${Math.min(y, br.height - 110)}px)`;
+}
+function hideTip() { tip.hidden = true; }
+
+// 节流 pointermove
+let moveQueued = null;
+canvas.addEventListener('pointermove', e => {
+  if (panning) {
+    view.x += e.clientX - panning.x;
+    view.y += e.clientY - panning.y;
+    panning = { x: e.clientX, y: e.clientY };
+    dirty = true; schedule();
+    return;
+  }
+  moveQueued = e;
+  if (!canvas._hm) {
+    canvas._hm = requestAnimationFrame(() => {
+      canvas._hm = 0;
+      const ev = moveQueued; if (!ev) return;
+      const w = toWorld(ev.clientX, ev.clientY);
+      const n = hit(w.x, w.y);
+      if (n !== hover) {
+        hover = n;
+        dirty = true; schedule();
+      }
+      canvas.style.cursor = n ? 'pointer' : 'grab';
+      if (n) showTip(n, ev.clientX, ev.clientY); else hideTip();
+    });
+  }
+});
+
+canvas.addEventListener('pointerdown', e => {
+  const w = toWorld(e.clientX, e.clientY);
+  down = { x: e.clientX, y: e.clientY, n: hit(w.x, w.y) };
+  if (!down.n) panning = { x: e.clientX, y: e.clientY };
+  canvas.setPointerCapture(e.pointerId);
+});
+canvas.addEventListener('pointerup', e => {
+  const moved = down ? Math.hypot(e.clientX - down.x, e.clientY - down.y) : 99;
+  panning = null;
+  if (moved > 5) { down = null; return; }
+  const n = down?.n || hit(...Object.values(toWorld(e.clientX, e.clientY)));
+  down = null;
+  if (n) {
+    if (focus && focus.id === n.id && n.href) { location.href = n.href; return; }
+    if (n.kind === 'hub') setFocus(null);
+    else setFocus(n);
+  } else if (focus) setFocus(null);
+});
+canvas.addEventListener('pointerleave', () => {
+  if (hover) { hover = null; dirty = true; schedule(); }
+  hideTip();
+});
+canvas.addEventListener('wheel', e => {
+  e.preventDefault();
+  const r = canvas.getBoundingClientRect();
+  const mx = e.clientX - r.left, my = e.clientY - r.top;
+  const factor = e.deltaY > 0 ? 0.9 : 1.1;
+  const nk = Math.min(2.2, Math.max(0.6, view.k * factor));
+  view.x = mx - (mx - view.x) * (nk / view.k);
+  view.y = my - (my - view.y) * (nk / view.k);
+  view.k = nk;
+  dirty = true; schedule();
+}, { passive: false });
+resetBtn.addEventListener('click', () => setFocus(null));
+
+function draw(now) {
+  const sx = cssW / data.W, sy = cssH / data.H;
+  ctx.fillStyle = '#10100E';
+  ctx.fillRect(0, 0, cssW, cssH);
+
+  ctx.save();
+  ctx.translate(view.x, view.y);
+  ctx.scale(view.k * sx, view.k * sy);
+
+  const active = focus || hover;
+  const set = active ? nbr(active.id) : null;
+
+  // 极淡同心环（结构参考，非装饰蜘蛛网）
+  ctx.lineWidth = 1;
+  ctx.strokeStyle = 'rgba(255,255,255,0.04)';
+  [210, 318].forEach(rad => {
+    ctx.beginPath(); ctx.arc(data.CX, data.CY, rad, 0, Math.PI * 2); ctx.stroke();
+  });
+
+  // 扇区分割虚线（极淡）
+  ctx.strokeStyle = 'rgba(232,184,74,0.06)';
+  [-110, -50, 20, 95, 175].forEach(deg => {
+    const a = (deg - 90) * Math.PI / 180;
+    ctx.beginPath();
+    ctx.moveTo(data.CX + Math.cos(a) * 40, data.CY + Math.sin(a) * 40);
+    ctx.lineTo(data.CX + Math.cos(a) * 340, data.CY + Math.sin(a) * 340);
+    ctx.stroke();
+  });
+
+  // edges — 两层：底线 + 高亮
+  for (const e of edges) {
+    const a = e.a, b = e.b;
+    const lit = set && (a.id === active.id || b.id === active.id) && set.has(a.id) && set.has(b.id);
+    const dim = !!set && !lit;
+    ctx.beginPath();
+    ctx.moveTo(a.x, a.y);
+    ctx.lineTo(b.x, b.y);
+    if (lit) {
+      ctx.strokeStyle = 'rgba(232,184,74,0.9)';
+      ctx.lineWidth = 1.6;
+    } else if (dim) {
+      ctx.strokeStyle = 'rgba(255,255,255,0.035)';
+      ctx.lineWidth = 1;
+    } else {
+      // hub spokes lighter than cross links
+      const hubEdge = a.kind === 'hub' || b.kind === 'hub';
+      ctx.strokeStyle = hubEdge ? 'rgba(200,190,170,0.14)' : 'rgba(200,190,170,0.28)';
+      ctx.lineWidth = hubEdge ? 1 : 1.15;
+    }
+    ctx.stroke();
+  }
+
+  // 短脉冲（仅聚焦瞬间，默认 signalsOn=false 则跳过）
+  if (pulse && !reduce) {
+    const t = (now - pulse.t0) / 800;
+    if (t < 1) {
+      for (const e of pulse.edges) {
+        const x = e.a.x + (e.b.x - e.a.x) * t;
+        const y = e.a.y + (e.b.y - e.a.y) * t;
+        ctx.beginPath();
+        ctx.arc(x, y, 2, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(242,194,48,${1 - t})`;
+        ctx.fill();
+      }
+    }
+  }
+
+  // nodes
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'top';
+  for (const n of nodes) {
+    const inSet = !set || set.has(n.id);
+    const on = active && n.id === active.id;
+    ctx.globalAlpha = inSet ? 1 : 0.16;
+
+    if (on) {
+      ctx.beginPath();
+      ctx.arc(n.x, n.y, n.r + 8, 0, Math.PI * 2);
+      ctx.fillStyle = n.color + '28';
+      ctx.fill();
+    }
+
+    ctx.beginPath();
+    ctx.arc(n.x, n.y, n.r, 0, Math.PI * 2);
+    if (n.kind === 'hub') {
+      ctx.fillStyle = '#16140F';
+      ctx.fill();
+      ctx.lineWidth = 2;
+      ctx.strokeStyle = n.color;
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.arc(n.x, n.y, 7, 0, Math.PI * 2);
+      ctx.fillStyle = n.color;
+      ctx.fill();
+    } else if (n.kind === 'lesson') {
+      ctx.fillStyle = '#16140F';
+      ctx.fill();
+      ctx.lineWidth = on ? 1.8 : 1.35;
+      ctx.strokeStyle = n.color;
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.arc(n.x, n.y, 2.8, 0, Math.PI * 2);
+      ctx.fillStyle = n.color;
+      ctx.fill();
+    } else {
+      ctx.fillStyle = '#141310';
+      ctx.fill();
+      ctx.setLineDash([2, 2]);
+      ctx.lineWidth = 1.1;
+      ctx.strokeStyle = n.color;
+      ctx.stroke();
+      ctx.setLineDash([]);
+    }
+
+    const ly = n.y + n.r + 5;
+    ctx.font = n.kind === 'hub'
+      ? '600 12px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace'
+      : '500 10.5px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace';
+    ctx.fillStyle = on ? '#F5F0E6' : '#B8B0A0';
+    ctx.fillText(n.label, n.x, ly);
+    if (n.kind !== 'hub') {
+      ctx.font = '400 9px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace';
+      ctx.fillStyle = on ? n.color : '#5E584E';
+      ctx.fillText(n.caseId, n.x, ly + 12);
+    }
+    ctx.globalAlpha = 1;
+  }
+
+  ctx.restore();
+}
+
+canvas.__net = { nodes, byId, setFocus, toScreen };
+dirty = true; schedule();
+</script>
+
+<style>
+:global(body:has(.zh)) {
+  background: #0C0C0A;
+  background-image: radial-gradient(rgba(255,255,255,.028) 1px, transparent 1px);
+  background-size: 4px 4px;
+  color: #E4DED2;
+}
+:global(body:has(.zh) .top) { background: rgba(12,12,10,.92); border-bottom-color: #24221E; }
+:global(body:has(.zh) .top a) { color: #8A8478; }
+:global(body:has(.zh) .top a.cur) { background: #1A1814; color: #E8B84A; }
+:global(body:has(.zh) .logo) { color: #E4DED2; }
+:global(body:has(.zh) .logo-img) { border-color: #3A3630; }
+:global(body:has(.zh) footer) { border-top-color: #24221E; color: #5E584E; }
+:global(body:has(.zh) .dangle) { display: none; }
+
+.zh-head { padding-top: 36px; max-width: 640px; }
+.zh-meta { display: flex; gap: 16px; font-size: 10px; letter-spacing: .14em; color: #5E584E; margin: 0 0 12px; }
+.zh-meta span:first-child { color: #E8B84A; }
+.zh h1 { font-family: var(--serif); font-size: clamp(26px, 3.6vw, 36px); margin: 0 0 10px; font-weight: 700; color: #F3EEE4; }
+.lead { margin: 0; font-size: 15.5px; line-height: 1.7; color: #8A8478; }
+
+.zh-stage { display: grid; grid-template-columns: minmax(0, 1fr) 240px; gap: 24px; margin-top: 24px; padding-bottom: 48px; align-items: start; }
+.panel { position: relative; border: 1px solid #2A2824; border-radius: 2px; background: #10100E; overflow: hidden; }
+.hud { display: flex; align-items: center; gap: 8px; padding: 7px 12px; border-bottom: 1px solid #24221E;
+  font-size: 10px; letter-spacing: .14em; color: #5E584E; background: linear-gradient(180deg,#141210,#10100E); min-height: 32px; }
+.hud #hud-mode { color: #E8B84A; }
+.hud .sep { opacity: .4; }
+.hud-spacer{flex:1}
+.hud-ip{width:24px;height:24px;border-radius:50%;border:1px solid #3A3630;opacity:.95;object-fit:cover;box-shadow:0 0 0 1px rgba(232,184,74,.2)}
+.hud-btn {  font: inherit; letter-spacing: .12em; font-size: 9px; color: #0C0C0A; background: #E8B84A;
+  border: 0; padding: 4px 8px; border-radius: 1px; cursor: pointer; }
+#g { display: block; width: 100%; height: auto; aspect-ratio: 1000 / 720; cursor: grab; touch-action: none; }
+
+.tip { position: absolute; left: 0; top: 0; z-index: 5; width: 228px; padding: 11px 12px; pointer-events: none;
+  background: rgba(16,16,14,.96); border: 1px solid #333028; border-left: 2px solid #E8B84A; will-change: transform; }
+.tip .t-id { font-size: 9px; letter-spacing: .12em; color: #E8B84A; margin-bottom: 3px; }
+.tip .t-title { font-family: var(--serif); font-size: 16px; color: #F3EEE4; font-weight: 700; margin-bottom: 5px; }
+.tip .t-body { font-family: var(--sans); font-size: 12.5px; line-height: 1.5; color: #8A8478; margin-bottom: 6px; }
+.tip .t-act { font-size: 9px; letter-spacing: .1em; color: #5E584E; }
+
+.dossier h2 { font-size: 10px; letter-spacing: .16em; color: #E8B84A; margin: 0 0 8px; font-weight: 600; }
+.dossier h2 + p, .dossier .ops { font-size: 13px; line-height: 1.6; color: #8A8478; margin: 0 0 20px; }
+.dossier b { color: #D8D0C0; font-weight: 600; }
+.legend { list-style: none; padding: 0; margin: 0 0 20px; display: flex; flex-direction: column; gap: 8px; }
+.legend li { display: flex; gap: 8px; font-size: 12px; color: #8A8478; }
+.legend i { width: 7px; height: 7px; border-radius: 50%; margin-top: 4px; flex: none; }
+.legend b { display: block; color: #C8C0B0; font-size: 10px; letter-spacing: .06em; }
+.ops { padding-left: 1.05em; }
+.ops li { margin-bottom: 3px; }
+.dossier .sd-btn { background: #E8B84A; color: #0C0C0A; border-color: #E8B84A; box-shadow: none; font-size: 13px; padding: 10px 16px; }
+.dossier .sd-btn:hover { box-shadow: none; filter: brightness(1.06); transform: none; }
+
+@media (max-width: 960px) {
+  .zh-stage { grid-template-columns: 1fr; }
+}
+</style>

@@ -1,0 +1,19 @@
+---
+import { u } from '../url';
+const { t, idx } = Astro.props;
+const d = t.data.date.toISOString().slice(0, 10);
+---
+<a class="row" href={u(`/tutorials/${t.id}/`)} data-tags={t.data.tags.join(',')} data-text={(t.data.title + t.data.description + t.data.tags.join(' ')).toLowerCase()}>
+  <span class="no mono">{t.data.order ? `#${String(t.data.order).padStart(3, '0')}` : idx !== undefined ? `#${String(idx).padStart(3, '0')}` : ''}</span>
+  <span class="main"><strong>{t.data.title}</strong><span class="desc">{t.data.description}</span>
+    <span class="meta mono">{d} · {t.data.level} · {t.data.tags.join(' / ')}</span></span>
+  <span class="arrow">→</span>
+</a>
+<style>
+.row{display:grid;grid-template-columns:64px 1fr 32px;gap:16px;align-items:start;padding:24px 4px;border-top:1px solid var(--line);text-decoration:none;transition:background .25s}
+.row:hover{background:rgba(242,194,48,.12)} .row:hover .arrow{transform:translateX(6px)}
+.no{color:var(--ink-3);font-size:14px;padding-top:4px} .main{display:flex;flex-direction:column;gap:6px}
+strong{font-family:var(--serif);font-size:22px;line-height:1.35} .desc{color:var(--ink-2);font-size:16px}
+.meta{color:var(--ink-3);font-size:13px} .arrow{font-size:20px;transition:transform .35s var(--spring);padding-top:2px}
+@media(max-width:640px){.row{grid-template-columns:1fr 24px}.no{display:none}strong{font-size:19px}}
+</style>

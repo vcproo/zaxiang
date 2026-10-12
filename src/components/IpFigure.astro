@@ -1,0 +1,127 @@
+---
+import { u } from '../url';
+interface Props {
+  variant?: 'hero' | 'about';
+  src: string;
+  alt: string;
+  width?: number;
+  height?: number;
+  caption?: string;
+}
+const { variant = 'hero', src, alt, width, height, caption } = Astro.props;
+/**
+ * Blink-only (no pupils / no pointer follow).
+ * Anchors measured from mint pixels on the current webp assets.
+ * Lids are face-ink overlays that scaleY-close over each main eye;
+ * .sec is a soft veil that dims the six spider dots during blink.
+ */
+const cfg = variant === 'hero'
+  ? {
+      // hero eyes: L 45.6/42.2 box~18.6x10.4 ; R 75.5/46.4 box~13.6x8.0
+      eyes: [
+        { x: 45.6, y: 42.2, w: 20.5, h: 12.0 },
+        { x: 75.5, y: 46.4, w: 16.5, h: 10.5 },
+      ],
+      sec: { x: 61.5, y: 35.5, w: 36, h: 10 },
+    }
+  : {
+      eyes: [
+        { x: 34.9, y: 46.1, w: 17.3, h: 11.9 },
+        { x: 65.5, y: 46.1, w: 17.3, h: 11.9 },
+      ],
+      sec: { x: 50.0, y: 36.4, w: 42, h: 11 },
+    };
+---
+<figure class:list={['ipfig', `ipfig--${variant}`]} data-ipfig data-blink>
+  <div class="ipfig-stage">
+    <img class="ipfig-img" src={u(src)} alt={alt} width={width} height={height} decoding="async" draggable="false"/>
+    <div class="ipfig-fx" aria-hidden="true">
+      {cfg.eyes.map(e => (
+        <span class="lid" style={`left:${e.x}%;top:${e.y}%;width:${e.w}%;height:${e.h}%`}></span>
+      ))}
+      <span class="sec" style={`left:${cfg.sec.x}%;top:${cfg.sec.y}%;width:${cfg.sec.w}%;height:${cfg.sec.h}%`}></span>
+    </div>
+  </div>
+  {caption && <figcaption class="ipfig-cap mono">{caption}</figcaption>}
+</figure>
+
+<style>
+.ipfig{margin:0;text-align:center}
+.ipfig-stage{position:relative;display:inline-block;max-width:100%;line-height:0;overflow:visible}
+.ipfig-img{display:block;width:100%;height:auto;max-width:100%;object-fit:contain;
+  filter:drop-shadow(0 14px 24px rgba(23,21,15,.12));user-select:none;-webkit-user-drag:none}
+.ipfig--hero .ipfig-img{width:min(100%,380px);filter:drop-shadow(0 16px 26px rgba(23,21,15,.13))}
+.ipfig--about .ipfig-img{width:100%}
+.ipfig-cap{line-height:1.4;margin-top:12px;font-size:11px;letter-spacing:.12em;color:var(--ink-3)}
+.ipfig-fx{position:absolute;inset:0;pointer-events:none;z-index:2}
+.lid{
+  position:absolute;transform:translate(-50%,-50%) scaleY(0.02);
+  transform-origin:50% 8%;
+  border-radius:40% 40% 45% 45% / 55% 55% 45% 45%;
+  background:#1B181F;
+  opacity:0;
+  will-change:transform,opacity;
+}
+.sec{
+  position:absolute;transform:translate(-50%,-50%);
+  border-radius:40%;
+  background:transparent;
+  opacity:0;
+  will-change:opacity;
+}
+/* Closed state — clearly covers mint eyes */
+.ipfig.is-blink .lid{
+  transform:translate(-50%,-50%) scaleY(1.05);
+  opacity:1;
+  transition: transform .11s cubic-bezier(.2,.85,.25,1), opacity .06s linear;
+}
+.ipfig.is-blink .sec{
+  opacity:1;
+  background:rgba(27,24,31,.72);
+  transition: opacity .1s linear;
+}
+.ipfig:not(.is-blink) .lid{
+  transition: transform .14s cubic-bezier(.4,0,.2,1), opacity .1s linear;
+}
+.ipfig:not(.is-blink) .sec{
+  transition: opacity .12s linear;
+}
+@media (prefers-reduced-motion: reduce){
+  .lid,.sec{transition:none !important}
+  .ipfig.is-blink .lid{transform:translate(-50%,-50%) scaleY(0.02);opacity:0}
+  .ipfig.is-blink .sec{opacity:0}
+}
+</style>
+
+<script>
+const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+if (!reduce) {
+  document.querySelectorAll('[data-blink]').forEach((root) => {
+    const el = root;
+    let busy = false;
+    const blinkOnce = (holdMs) => {
+      if (busy) return;
+      busy = true;
+      el.classList.add('is-blink');
+      window.setTimeout(() => {
+        el.classList.remove('is-blink');
+        busy = false;
+      }, holdMs);
+    };
+    // First blink soon so it's obvious on load
+    window.setTimeout(() => blinkOnce(220), 900 + Math.random() * 500);
+    const loop = () => {
+      const wait = 2400 + Math.random() * 3200;
+      window.setTimeout(() => {
+        blinkOnce(180 + Math.random() * 100);
+        // occasional double-blink
+        if (Math.random() < 0.28) {
+          window.setTimeout(() => blinkOnce(140), 280);
+        }
+        loop();
+      }, wait);
+    };
+    loop();
+  });
+}
+</script>
