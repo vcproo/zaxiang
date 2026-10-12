@@ -9,18 +9,36 @@ interface Props {
   caption?: string;
 }
 const { variant = 'hero', src, alt, width, height, caption } = Astro.props;
-/** 瞳孔锚点（相对整图百分比）——按裁切后的立绘实测 */
-const eyes = variant === 'hero'
-  ? { lx: 42.2, ly: 45.5, rx: 51.0, ry: 44.7, ew: 5.5, eh: 3.6 }
-  : { lx: 35.6, ly: 51.7, rx: 66.8, ry: 51.7, ew: 9.0, eh: 5.6 };
+/**
+ * Blink-only lids (no pupils, no pointer follow).
+ * Anchors are % of the full figure bitmap (pad included).
+ * Lid = face ink overlay that scaleY-closes over each mint main eye;
+ * sec = soft ink veil that dims the six spider dots during blink.
+ */
+const cfg = variant === 'hero'
+  ? {
+      eyes: [
+        { x: 47.4, y: 42.2, w: 14.0, h: 8.5 },
+        { x: 79.3, y: 46.3, w: 14.0, h: 8.3 },
+      ],
+      sec: { x: 64.6, y: 35.3, w: 37, h: 10 },
+    }
+  : {
+      eyes: [
+        { x: 35.1, y: 46.5, w: 15.0, h: 9.0 },
+        { x: 68.7, y: 46.5, w: 15.0, h: 9.0 },
+      ],
+      sec: { x: 51.7, y: 36.4, w: 38, h: 9 },
+    };
 ---
-<figure class:list={['ipfig', `ipfig--${variant}`]} data-ipfig data-eyes={JSON.stringify(eyes)}>
+<figure class:list={['ipfig', `ipfig--${variant}`]} data-ipfig data-blink>
   <div class="ipfig-stage">
     <img class="ipfig-img" src={u(src)} alt={alt} width={width} height={height} decoding="async" draggable="false"/>
-    <div class="ipfig-eyes" aria-hidden="true">
-      <span class="eye" style={`left:${eyes.lx}%;top:${eyes.ly}%;width:${eyes.ew}%;height:${eyes.eh}%`}><i class="pupil"></i></span>
-      <span class="eye" style={`left:${eyes.rx}%;top:${eyes.ry}%;width:${eyes.ew}%;height:${eyes.eh}%`}><i class="pupil"></i></span>
-      <span class="lids"></span>
+    <div class="ipfig-fx" aria-hidden="true">
+      {cfg.eyes.map(e => (
+        <span class="lid" style={`left:${e.x}%;top:${e.y}%;width:${e.w}%;height:${e.h}%`}></span>
+      ))}
+      <span class="sec" style={`left:${cfg.sec.x}%;top:${cfg.sec.y}%;width:${cfg.sec.w}%;height:${cfg.sec.h}%`}></span>
     </div>
   </div>
   {caption && <figcaption class="ipfig-cap mono">{caption}</figcaption>}
@@ -28,70 +46,69 @@ const eyes = variant === 'hero'
 
 <style>
 .ipfig{margin:0;text-align:center}
-.ipfig-stage{position:relative;display:inline-block;max-width:100%;line-height:0;
-  /* 透明边距已在 PNG 内；再用 contain 防容器裁切 */
-  overflow:visible}
+.ipfig-stage{position:relative;display:inline-block;max-width:100%;line-height:0;overflow:visible}
 .ipfig-img{display:block;width:100%;height:auto;max-width:100%;object-fit:contain;
   filter:drop-shadow(0 14px 24px rgba(23,21,15,.12));user-select:none;-webkit-user-drag:none}
-.ipfig--hero .ipfig-img{width:min(100%,360px);filter:drop-shadow(0 18px 28px rgba(23,21,15,.14))}
+.ipfig--hero .ipfig-img{width:min(100%,360px);filter:drop-shadow(0 16px 26px rgba(23,21,15,.13))}
 .ipfig--about .ipfig-img{width:100%}
 .ipfig-cap{line-height:1.4;margin-top:12px;font-size:11px;letter-spacing:.12em;color:var(--ink-3)}
-.ipfig-eyes{position:absolute;inset:0;pointer-events:none}
-.eye{position:absolute;transform:translate(-50%,-50%);border-radius:50%;
-  overflow:hidden;background:transparent}
-.pupil{position:absolute;left:50%;top:52%;width:42%;height:55%;border-radius:50%;
-  background:rgba(20,40,34,.72);transform:translate(-50%,-50%);
-  box-shadow:inset 0 -1px 0 rgba(255,255,255,.25); will-change:transform;
-  transition:transform .08s linear}
-.lids{position:absolute;inset:0;background:transparent;opacity:0;
-  /* lids are drawn as two dark ellipses via box-shadow? use mask instead — simpler: scale eyes */
-  pointer-events:none}
-.ipfig.is-blink .eye{transform:translate(-50%,-50%) scaleY(0.08); transform-origin:center 40%}
-.ipfig.is-blink .pupil{opacity:0}
-@media(prefers-reduced-motion:reduce){
-  .pupil{transition:none}
-  .ipfig.is-blink .eye{transform:translate(-50%,-50%)}
+.ipfig-fx{position:absolute;inset:0;pointer-events:none}
+.lid{
+  position:absolute;transform:translate(-50%,-50%) scaleY(0.04);
+  transform-origin:50% 12%;
+  border-radius:50% 50% 48% 48%;
+  background:#1B181F;
+  opacity:0;
+  transition: transform .1s steps(2,end), opacity .06s linear;
+}
+.sec{
+  position:absolute;transform:translate(-50%,-50%);
+  border-radius:45%;
+  background:transparent;
+  opacity:0;
+  transition: opacity .1s linear;
+}
+.ipfig.is-blink .lid{
+  transform:translate(-50%,-50%) scaleY(1);
+  opacity:1;
+  transition: transform .08s cubic-bezier(.2,.8,.2,1), opacity .05s linear;
+}
+.ipfig.is-blink .sec{
+  opacity:1;
+  background:rgba(27,24,31,.58);
+  transition: opacity .08s linear;
+}
+@media (prefers-reduced-motion: reduce){
+  .lid,.sec{transition:none !important}
+  .ipfig.is-blink .lid{transform:translate(-50%,-50%) scaleY(0.04);opacity:0}
+  .ipfig.is-blink .sec{opacity:0}
 }
 </style>
 
 <script>
 const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
-document.querySelectorAll<HTMLElement>('[data-ipfig]').forEach(root => {
-  const eyes = root.querySelectorAll<HTMLElement>('.eye');
-  const pupils = root.querySelectorAll<HTMLElement>('.pupil');
-  const stage = root.querySelector('.ipfig-stage') as HTMLElement;
-  let mx = 0, my = 0, cx = 0, cy = 0, raf = 0, blinkT = 0;
-
-  function aim() {
-    raf = 0;
-    const max = 22; // % within eye
-    pupils.forEach((p, i) => {
-      const er = eyes[i].getBoundingClientRect();
-      const ex = er.left + er.width / 2, ey = er.top + er.height / 2;
-      let dx = (mx - ex) / (window.innerWidth * 0.35);
-      let dy = (my - ey) / (window.innerHeight * 0.35);
-      dx = Math.max(-1, Math.min(1, dx));
-      dy = Math.max(-1, Math.min(1, dy));
-      p.style.transform = `translate(calc(-50% + ${dx * max}%), calc(-50% + ${dy * max}%))`;
-    });
-  }
-
-  if (!reduce) {
-    window.addEventListener('pointermove', e => {
-      mx = e.clientX; my = e.clientY;
-      if (!raf) raf = requestAnimationFrame(aim);
-    }, { passive: true });
-    // idle drift toward center of stage occasionally reset
-    const loop = (t: number) => {
-      if (!blinkT) blinkT = t + 2400 + Math.random() * 3200;
-      if (t >= blinkT) {
+if (!reduce) {
+  document.querySelectorAll<HTMLElement>('[data-blink]').forEach(root => {
+    let next = 0;
+    const tick = (t: number) => {
+      if (!next) next = t + 2200 + Math.random() * 2800;
+      if (t >= next) {
         root.classList.add('is-blink');
-        setTimeout(() => root.classList.remove('is-blink'), 120 + Math.random() * 40);
-        blinkT = t + 2800 + Math.random() * 5000;
+        const hold = 90 + Math.random() * 50;
+        setTimeout(() => root.classList.remove('is-blink'), hold);
+        if (Math.random() < 0.22) {
+          setTimeout(() => {
+            root.classList.add('is-blink');
+            setTimeout(() => root.classList.remove('is-blink'), 80);
+          }, hold + 120);
+          next = t + 4500 + Math.random() * 4000;
+        } else {
+          next = t + 2600 + Math.random() * 4200;
+        }
       }
-      requestAnimationFrame(loop);
+      requestAnimationFrame(tick);
     };
-    requestAnimationFrame(loop);
-  }
-});
+    requestAnimationFrame(tick);
+  });
+}
 </script>
