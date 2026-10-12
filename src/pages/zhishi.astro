@@ -92,7 +92,9 @@ const data = { nodes: placed, edges: EDGES, groups: GROUPS, W, H, CX, CY };
         <span id="hud-mode">OVERVIEW</span>
         <span class="sep">/</span>
         <span id="hud-sel">—</span>
+        <span class="hud-spacer"></span>
         <button type="button" class="hud-btn" id="reset" hidden>RESET</button>
+        <img class="hud-ip" src={u("/ip/avatar-64.png")} width="22" height="22" alt="" decoding="async"/>
       </div>
       <canvas id="g" width={W} height={H} aria-label="AI 知识网络图"></canvas>
       <div class="tip" id="tip" hidden></div>
@@ -438,6 +440,7 @@ dirty = true; schedule();
 :global(body:has(.zh) .top a) { color: #8A8478; }
 :global(body:has(.zh) .top a.cur) { background: #1A1814; color: #E8B84A; }
 :global(body:has(.zh) .logo) { color: #E4DED2; }
+:global(body:has(.zh) .logo-img) { border-color: #3A3630; }
 :global(body:has(.zh) footer) { border-top-color: #24221E; color: #5E584E; }
 :global(body:has(.zh) .dangle) { display: none; }
 
@@ -453,7 +456,9 @@ dirty = true; schedule();
   font-size: 10px; letter-spacing: .12em; color: #5E584E; background: #12110F; min-height: 34px; }
 .hud #hud-mode { color: #E8B84A; }
 .hud .sep { opacity: .4; }
-.hud-btn { margin-left: auto; font: inherit; letter-spacing: .12em; font-size: 9px; color: #0C0C0A; background: #E8B84A;
+.hud-spacer{flex:1}
+.hud-ip{width:22px;height:22px;border-radius:50%;border:1px solid #3A3630;opacity:.9;object-fit:cover}
+.hud-btn {  font: inherit; letter-spacing: .12em; font-size: 9px; color: #0C0C0A; background: #E8B84A;
   border: 0; padding: 4px 8px; border-radius: 1px; cursor: pointer; }
 #g { display: block; width: 100%; height: auto; aspect-ratio: 1000 / 720; cursor: grab; touch-action: none; }
 

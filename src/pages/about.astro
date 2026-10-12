@@ -1,10 +1,16 @@
 ---
+import { u } from '../url';
 import Base from '../layouts/Base.astro';
 import { SITE } from '../site';
 ---
 <Base title="关于">
 <section class="wrap about">
   <h1>关于蜘蛛侦探</h1>
+  <div class="about-grid">
+  <figure class="portrait">
+    <img src={u("/ip/character-front.webp")} width="320" height="362" alt="蜘蛛侦探标准立绘" decoding="async"/>
+    <figcaption class="mono">标准立绘 · 观察态</figcaption>
+  </figure>
   <div class="prose">
     <p>你好，我是「蜘蛛侦探」。像蜘蛛织网一样，我把零散的 AI 知识点连成一张能用的网；像侦探查案一样，我对每个新工具都先问一句：它到底是怎么做到的？</p>
     <p>这个网站是我的 AI 教程档案馆。每篇教程都会写清楚适用场景、准备工作和完整步骤，尽量让你读完就能动手。</p>
@@ -13,11 +19,16 @@ import { SITE } from '../site';
     <h2>找到我</h2>
     <p class="social">{SITE.socials.map(s => <a class="sd-tag" href={s.url}>{s.name}</a>)}</p>
     <p class="note">合作与投稿：<span class="mono">hello@example.com</span></p>
-  </div>
+  </div></div>
 </section>
 </Base>
 <style>
-.about{max-width:760px} h1{font-family:var(--serif);font-size:44px;margin:56px 0 24px}
+.about{max-width:900px} h1{font-family:var(--serif);font-size:44px;margin:56px 0 24px}
+.about-grid{display:grid;grid-template-columns:220px 1fr;gap:36px;align-items:start}
+.portrait{margin:0;padding:18px;background:var(--paper-2);border:1.5px solid var(--ink);border-radius:var(--r);box-shadow:4px 4px 0 var(--pin);text-align:center}
+.portrait img{width:100%;height:auto;display:block;filter:drop-shadow(0 4px 0 rgba(23,21,15,.06))}
+.portrait figcaption{margin-top:12px;font-size:11px;letter-spacing:.1em;color:var(--ink-3)}
+@media(max-width:720px){.about-grid{grid-template-columns:1fr}.portrait{max-width:200px}}
 h2{font-family:var(--serif);font-size:26px;margin:40px 0 12px} .prose{font-size:18px;color:var(--ink-2)}
 .social{display:flex;flex-wrap:wrap;gap:10px} .note{font-size:15px;color:var(--ink-3)}
 </style>

@@ -17,15 +17,10 @@ const tags = [...new Set(all.flatMap(t => t.data.tags))];
     <div class="cta rise" style="animation-delay:.24s"><a class="sd-btn" href={u("/tutorials/")}>开始读教程 →</a><a class="sd-btn ghost" href={u("/about/")}>认识我</a></div>
     <ul class="social rise" style="animation-delay:.32s">{SITE.socials.map(s => <li><a href={s.url}>{s.name}</a></li>)}</ul>
   </div>
-  <svg class="web rise" style="animation-delay:.1s" viewBox="0 0 400 400" aria-hidden="true">
-    <g fill="none" stroke="#17150F" stroke-width="1.2" opacity=".75">
-      {[0,30,60,90,120,150].map(a => <line x1="200" y1="200" x2={200+190*Math.cos(a*Math.PI/180)} y2={200+190*Math.sin(a*Math.PI/180)} transform-origin="200 200"/>)}
-      {[0,30,60,90,120,150].map(a => <line x1="200" y1="200" x2={200-190*Math.cos(a*Math.PI/180)} y2={200-190*Math.sin(a*Math.PI/180)}/>)}
-      {[40,80,120,160].map(r => <polygon points={Array.from({length:12},(_,i)=>`${200+r*Math.cos(i*Math.PI/6)},${200+r*Math.sin(i*Math.PI/6)}`).join(' ')}/>)}
-    </g>
-    <line class="thread" x1="200" y1="0" x2="200" y2="200" stroke="#17150F" stroke-width="1.5"/>
-    <circle class="pin" cx="200" cy="200" r="16" fill="#F2C230" stroke="#17150F" stroke-width="3"/>
-  </svg>
+  <div class="hero-ip rise" style="animation-delay:.1s">
+    <img class="ip-fig" src={u("/ip/character-hero.webp")} width="420" height="556" alt="蜘蛛侦探角色：持放大镜与笔记本" decoding="async"/>
+    <p class="ip-cap mono">IP · SPIDER DETECTIVE</p>
+  </div>
 </section>
 <section class="wrap block">
   <a class="series" href={u("/baihuake/")}><span class="mono">SERIES · 10 篇</span><strong>AI 白话课：十个 AI 热词，说人话</strong><span>不讲公式，不堆术语。每篇讲一个词，配一个能点着玩的小演示。</span><em>进入专题 →</em></a>
@@ -73,7 +68,9 @@ h1{font-family:var(--serif);font-size:clamp(36px,5.4vw,64px);line-height:1.22;ma
 .cta{display:flex;gap:12px;flex-wrap:wrap}
 .social{list-style:none;padding:0;margin:36px 0 0;display:flex;gap:18px;flex-wrap:wrap;font-size:14px}
 .social a{color:var(--ink-3);text-decoration:none;border-bottom:1px dashed var(--line)} .social a:hover{color:var(--ink)}
-.web{width:100%;max-width:420px;justify-self:end}
+.hero-ip{justify-self:end;text-align:center;position:relative}
+.ip-fig{width:min(100%,380px);height:auto;filter:drop-shadow(6px 10px 0 rgba(23,21,15,.08));display:block;margin:0 auto}
+.ip-cap{margin:10px 0 0;font-size:11px;letter-spacing:.14em;color:var(--ink-3)}
 .pin{transform-origin:200px 200px;animation:drop .9s .5s cubic-bezier(.34,1.8,.5,1) both}
 .thread{stroke-dasharray:200;animation:draw .6s .3s ease-out both}
 @keyframes drop{from{transform:translateY(-180px) scale(.6)}to{transform:none}}
@@ -104,5 +101,5 @@ h1{font-family:var(--serif);font-size:clamp(36px,5.4vw,64px);line-height:1.22;ma
 .webcard .preview .c{left:70px;top:68px;border-color:#6B9E78}
 .webcard .preview .d{left:58px;top:18px;border-color:#8A8478;border-style:dashed}
 @media(max-width:640px){.webcard{padding-right:28px}.webcard .preview{display:none}}
-@media(max-width:860px){.hero{grid-template-columns:1fr;padding-top:40px}.web{max-width:260px;justify-self:center;order:-1}}
+@media(max-width:860px){.hero{grid-template-columns:1fr;padding-top:40px}.hero-ip{order:-1}.ip-fig{max-width:220px}}
 </style>
