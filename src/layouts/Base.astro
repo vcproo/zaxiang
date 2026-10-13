@@ -4,7 +4,7 @@ import '../styles/global.css';
 import { SITE } from '../site';
 const { title, description = SITE.tagline } = Astro.props;
 const path = Astro.url.pathname.replace(import.meta.env.BASE_URL.replace(/\/$/, ''), '') || '/';
-const nav = [['/', '首页'], ['/tutorials/', '教程'], ['/baihuake/', '白话课'], ['/zhishi/', '知识网'], ['/about/', '关于']];
+const nav = [['/', '首页'], ['/tutorials/', '教程'], ['/baihuake/', '白话课'], ['/zhishi/', '知识网'], ['/motion/', '动效'], ['/tools/', '工具'], ['/about/', '关于']];
 ---
 <html lang="zh-CN"><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
 <title>{title ? `${title} · ${SITE.name}` : `${SITE.name} · AI 教程与笔记`}</title>
@@ -58,10 +58,11 @@ if (!reduce && matchMedia('(pointer: fine)').matches) {
 .logo:hover .logo-img{transform:scale(1.06);box-shadow:2px 2px 0 var(--pin)}
 .dot{display:none}
 .dot{width:12px;height:12px;border-radius:50%;background:var(--pin);box-shadow:0 0 0 2px var(--ink)}
-nav{display:flex;gap:4px} nav a{text-decoration:none;padding:6px 12px;border-radius:var(--r);color:var(--ink-2);font-size:15px}
+nav{display:flex;gap:4px} nav a{white-space:nowrap} nav a{text-decoration:none;padding:6px 12px;border-radius:var(--r);color:var(--ink-2);font-size:15px}
 nav a:hover{color:var(--ink);background:rgba(242,194,48,.15)}
 nav a.cur{color:var(--ink);background:var(--paper-2);font-weight:600}
 footer{border-top:1px solid var(--line);margin-top:96px;padding:28px 0;color:var(--ink-3);font-size:14px}
 .foot{display:flex;flex-wrap:wrap;gap:12px;justify-content:space-between}
 .links{display:flex;gap:16px;flex-wrap:wrap} .links a{text-decoration:none} .links a:hover{color:var(--ink)}
+@media(max-width:720px){.sd-bar{height:auto;min-height:60px;flex-wrap:wrap;padding-top:12px;padding-bottom:10px;gap:10px}.logo{white-space:nowrap}nav{width:100%;overflow-x:auto;padding-bottom:3px}nav a{flex:none;padding:6px 10px}}
 </style></body></html>
