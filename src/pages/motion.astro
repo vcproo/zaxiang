@@ -1,73 +1,109 @@
 ---
+import { u } from '../url';
 import Base from '../layouts/Base.astro';
-const studies = [
-  { id: 'search', no: '01', name: '发现线索', detail: '光圈掠过纸面，让藏在细节里的线索浮现。', tag: '观察' },
-  { id: 'connect', no: '02', name: '建立联系', detail: '从一个点出发，将零散的信息连成路径。', tag: '推理' },
-  { id: 'stamp', no: '03', name: '调查完成', detail: '档案归位，盖下这一轮调查的确认印章。', tag: '确认' },
-];
+const styleSrc = u('/style-motion/styles.html') + '?embed=1';
+const motionSrc = u('/style-motion/motion.html') + '?embed=1';
 ---
-<Base title="动效画面" description="蜘蛛侦探的动效画面展示：发现线索、建立联系与调查完成。">
+<Base title="动效档案" description="17 种画风和 34 个动效，用来对齐叫法、挑选气质、复制给 AI。">
   <section class="wrap motion-page">
     <header class="intro">
-      <p class="mono eyebrow">MOTION STUDIES / 动效档案</p>
-      <h1>让线索，动起来。</h1>
-      <p class="lead">观察、联系、确认。用三个小画面，记录调查中的片刻。</p>
+      <p class="mono eyebrow">MOTION ARCHIVE / 动效档案</p>
+      <h1>画风怎么叫，动效怎么动。</h1>
+      <p class="lead">做片子前先把叫法对齐。下面是 17 种能稳定做出来的画风，和 34 个拆到最小单元的动效。看中哪个，把那句话交给你的 AI。</p>
+      <div class="formula" aria-label="一句话说清一个镜头">
+        <div><code class="mono">画风</code><b>看起来像什么</b><span>暗场网格、蓝图、瑞士海报……</span></div>
+        <div><code class="mono">镜头</code><b>这镜完成什么任务</b><span>讲清关系、拆开零件、砸一个数字</span></div>
+        <div><code class="mono">动效</code><b>东西怎么动</b><span>砸字、描边生长、容器变形接力</span></div>
+      </div>
     </header>
-    <div class="studies">
-      {studies.map(study => (
-        <article class="study" data-study>
-          <div class={`scene scene--${study.id}`} aria-hidden="true">
-            <span class="scene-label mono">CASE / {study.no}</span>
-            {study.id === 'search' && <div class="evidence"><i></i><i></i><i></i><span class="clue-word">关键线索</span><span class="search-ring"></span></div>}
-            {study.id === 'connect' && <svg class="connections" viewBox="0 0 320 220"><path class="route" d="M55 145 L125 65 L205 150 L270 70"/><circle cx="55" cy="145" r="10"/><circle cx="125" cy="65" r="10"/><circle cx="205" cy="150" r="10"/><circle cx="270" cy="70" r="10"/><circle class="traveller" r="5"><!-- Position follows the same path through CSS. --></circle></svg>}
-            {study.id === 'stamp' && <div class="file"><span class="mono">DETECTIVE ARCHIVE</span><i></i><i></i><strong class="seal">已确认</strong></div>}
-          </div>
-          <div class="study-body">
-            <div class="study-heading"><h2>{study.name}</h2><span class="sd-tag">{study.tag}</span></div>
-            <p>{study.detail}</p>
-            <div class="controls"><button type="button" data-toggle aria-label={`播放${study.name}动效`} aria-pressed="false">播放</button><button type="button" data-replay aria-label={`重播${study.name}动效`}>重播 ↻</button><span class="status mono" aria-live="polite">待播放</span></div>
-          </div>
-        </article>
-      ))}
+
+    <div class="archive" data-archive>
+      <div class="tabs" role="tablist" aria-label="档案分类">
+        <button type="button" class="sd-tag on" role="tab" id="tab-style" aria-controls="panel-style" aria-selected="true" data-tab="style">画风导览 · 17</button>
+        <button type="button" class="sd-tag" role="tab" id="tab-motion" aria-controls="panel-motion" aria-selected="false" data-tab="motion">动效词典 · 34</button>
+      </div>
+      <p class="hint" data-hint-style>点开色卡，复制「对 AI 这么说」。样张只展示气质，你的内容细节会不一样。</p>
+      <p class="hint" data-hint-motion hidden>放慢到 ¼× 看帧，拖滑杆改手感，再复制那一行调用码。也可以说「像 #10，但再慢一点」。</p>
+      <figure class="board">
+        <figcaption class="mono"><span data-cap>EVIDENCE · STYLE</span><span>LIVE DEMO</span></figcaption>
+        <div class="board-view">
+          <iframe
+            id="panel-style"
+            role="tabpanel"
+            aria-labelledby="tab-style"
+            title="画风导览"
+            src={styleSrc}
+            allow="clipboard-write"
+          ></iframe>
+          <iframe
+            id="panel-motion"
+            role="tabpanel"
+            aria-labelledby="tab-motion"
+            title="动效词典"
+            data-src={motionSrc}
+            allow="clipboard-write"
+            hidden
+          ></iframe>
+        </div>
+      </figure>
     </div>
-    <p class="footnote">点击播放查看动效。开启系统“减少动态效果”时，将展示静态画面。</p>
+    <p class="note">舞台里的画面由代码实时绘制。开启系统「减少动态效果」时，画风样张会停在代表性的一帧。</p>
   </section>
 </Base>
-<style>
-.motion-page{padding-top:60px}.intro{margin-bottom:38px}.eyebrow{font-size:12px;color:var(--ink-3);letter-spacing:.12em}h1{font-family:var(--serif);font-size:clamp(32px,5vw,52px);line-height:1.3;margin:14px 0}.lead{color:var(--ink-2);max-width:620px}.studies{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:24px}.study{min-width:0;border:1px solid var(--line);border-radius:var(--r);overflow:hidden;background:#fbf9f4}.scene{height:270px;position:relative;display:grid;place-items:center;overflow:hidden;background:var(--paper-2);border-bottom:1px solid var(--line)}.scene-label{position:absolute;left:20px;top:16px;font-size:11px;color:var(--ink-3)}.study-body{padding:22px}.study-heading{display:flex;align-items:center;justify-content:space-between;gap:8px}h2{font-size:23px;font-family:var(--serif);margin:0}.study-body p{font-size:15px;color:var(--ink-2);min-height:52px}.controls{display:flex;align-items:center;gap:12px;flex-wrap:wrap}.controls button{font:inherit;font-size:13px;border:1px solid var(--line);padding:6px 12px;border-radius:4px;background:transparent;cursor:pointer}.controls button:first-child{background:var(--ink);color:var(--paper);border-color:var(--ink)}button:focus-visible{outline:3px solid var(--pin);outline-offset:3px}.controls button:disabled{opacity:.5;cursor:default}.status{font-size:11px;color:var(--ink-3)}.footnote{font-size:13px;color:var(--ink-3);margin-top:26px}.evidence,.file{width:190px;height:140px;padding:24px;background:#fbf9f4;box-shadow:3px 5px 0 #d6cebc;position:relative;rotate:-5deg}.evidence i,.file i{display:block;width:100%;height:3px;background:var(--line);margin:10px 0}.evidence i:nth-child(2){width:70%}.clue-word{font-size:15px;background:var(--pin);padding:2px 8px}.search-ring{position:absolute;width:72px;height:72px;border:3px solid var(--ink);border-radius:50%;left:22px;top:65px;background:#f2c23022;animation:search 4s ease-in-out infinite}.search-ring::after{content:'';position:absolute;width:36px;height:5px;background:var(--ink);right:-28px;bottom:-12px;rotate:45deg;border-radius:3px}.connections{width:100%;max-width:320px;height:220px}.route{fill:none;stroke:var(--ink);stroke-width:2;stroke-dasharray:330;animation:trace 4s ease-in-out infinite}.connections circle{fill:var(--paper);stroke:var(--ink);stroke-width:2}.connections .traveller{fill:var(--pin);offset-path:path('M55 145 L125 65 L205 150 L270 70');animation:travel 4s ease-in-out infinite}.file{rotate:3deg}.file>span{font-size:9px;letter-spacing:.1em}.seal{position:absolute;left:38px;top:70px;padding:1px 14px;color:#a94839;border:3px double currentColor;font-size:25px;rotate:-12deg;animation:stamp 4s ease-in-out infinite}.study .scene *{animation-play-state:paused}.study.is-playing .scene *{animation-play-state:running}
-@keyframes search{0%,100%{transform:translate(0,0)}50%{transform:translate(64px,-44px)}}
-@keyframes trace{0%,10%{stroke-dashoffset:330}70%,100%{stroke-dashoffset:0}}
-@keyframes travel{0%,10%{offset-distance:0%}70%,100%{offset-distance:100%}}
-@keyframes stamp{0%,15%{opacity:0;transform:translateY(-25px) scale(1.3)}30%,85%{opacity:1;transform:translateY(0) scale(1)}100%{opacity:0;transform:translateY(0) scale(1)}}
-@media(max-width:900px){.studies{grid-template-columns:1fr}.study{display:grid;grid-template-columns:1fr 1fr}.scene{border-bottom:0;border-right:1px solid var(--line)}.study-body{align-self:center}}
-@media(max-width:560px){.motion-page{padding-top:32px}.study{display:block}.scene{height:240px;border-right:0;border-bottom:1px solid var(--line)}}
-@media(prefers-reduced-motion:reduce){.seal{opacity:1}.route{stroke-dashoffset:0}}
+<style is:global>
+.motion-page{padding-top:48px;padding-bottom:8px}
+.motion-page .eyebrow{font-size:12px;color:var(--ink-3);letter-spacing:.12em;margin:0 0 12px}
+.motion-page h1{font-family:var(--serif);font-size:clamp(32px,5vw,52px);line-height:1.25;margin:0 0 16px}
+.motion-page .lead{color:var(--ink-2);max-width:40em;margin:0 0 28px;font-size:18px}
+.motion-page .formula{margin:0 0 36px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));border:1.5px solid var(--ink);border-radius:var(--r);background:#fbf9f4;box-shadow:4px 4px 0 var(--pin);overflow:hidden}
+.motion-page .formula > div{padding:16px 18px;display:grid;gap:4px;min-width:0}
+.motion-page .formula > div + div{border-left:1px solid var(--line)}
+.motion-page .formula code{font-size:11px;color:var(--ink-3);letter-spacing:.08em}
+.motion-page .formula b{font-family:var(--serif);font-size:20px}
+.motion-page .formula span{font-size:13px;color:var(--ink-2)}
+.motion-page .tabs{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 12px}
+.motion-page .tabs button{font:inherit;cursor:pointer}
+.motion-page .hint{font-size:14px;color:var(--ink-3);margin:0 0 14px}
+.motion-page .board{margin:0;background:#fbf9f4;border:1.5px solid var(--ink);border-radius:var(--r);box-shadow:4px 4px 0 var(--pin);overflow:hidden}
+.motion-page .board figcaption{display:flex;justify-content:space-between;gap:12px;padding:8px 14px;border-bottom:1px solid var(--line);background:var(--paper-2);font-size:11px;letter-spacing:.12em;color:var(--ink-3)}
+.motion-page .board-view{height:min(78vh,900px);min-height:560px;background:var(--paper)}
+.motion-page .board iframe{width:100%;height:100%;border:0;display:block;background:var(--paper)}
+.motion-page .board iframe[hidden]{display:none}
+.motion-page .note{font-size:13px;color:var(--ink-3);margin-top:18px}
+@media(max-width:720px){
+  .motion-page{padding-top:28px}
+  .motion-page .formula{grid-template-columns:1fr}
+  .motion-page .formula > div + div{border-left:0;border-top:1px solid var(--line)}
+  .motion-page .board-view{height:70vh;min-height:480px}
+}
 </style>
 <script>
-const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
-document.querySelectorAll<HTMLElement>('[data-study]').forEach(card => {
-  const toggle = card.querySelector<HTMLButtonElement>('[data-toggle]')!;
-  const replay = card.querySelector<HTMLButtonElement>('[data-replay]')!;
-  const status = card.querySelector<HTMLElement>('.status')!;
-  const title = card.querySelector('h2')!.textContent;
-  function setPlaying(playing: boolean) {
-    card.classList.toggle('is-playing', playing);
-    toggle.textContent = playing ? '暂停' : '播放';
-    toggle.setAttribute('aria-pressed', String(playing));
-    toggle.setAttribute('aria-label', `${playing ? '暂停' : '播放'}${title}动效`);
-    status.textContent = playing ? '播放中' : '已暂停';
-  }
-  toggle.addEventListener('click', () => setPlaying(!card.classList.contains('is-playing')));
-  replay.addEventListener('click', () => {
-    card.getAnimations({ subtree: true }).forEach(animation => { animation.currentTime = 0; });
-    setPlaying(true);
+const root = document.querySelector<HTMLElement>('[data-archive]')!;
+const buttons = [...root.querySelectorAll<HTMLButtonElement>('[data-tab]')];
+const styleFrame = document.getElementById('panel-style') as HTMLIFrameElement;
+const motionFrame = document.getElementById('panel-motion') as HTMLIFrameElement;
+const hintStyle = root.querySelector<HTMLElement>('[data-hint-style]')!;
+const hintMotion = root.querySelector<HTMLElement>('[data-hint-motion]')!;
+const cap = root.querySelector<HTMLElement>('[data-cap]')!;
+
+function show(name: 'style' | 'motion') {
+  const onMotion = name === 'motion';
+  if (onMotion && !motionFrame.src) motionFrame.src = motionFrame.dataset.src || '';
+  styleFrame.hidden = onMotion;
+  motionFrame.hidden = !onMotion;
+  hintStyle.hidden = onMotion;
+  hintMotion.hidden = !onMotion;
+  cap.textContent = onMotion ? 'EVIDENCE · MOTION' : 'EVIDENCE · STYLE';
+  buttons.forEach(btn => {
+    const selected = btn.dataset.tab === name;
+    btn.setAttribute('aria-selected', String(selected));
+    btn.classList.toggle('on', selected);
   });
-  function syncPreference() {
-    toggle.disabled = replay.disabled = reducedMotion.matches;
-    if (reducedMotion.matches) { setPlaying(false); status.textContent = '静态展示'; }
-    else status.textContent = card.classList.contains('is-playing') ? '播放中' : '待播放';
-  }
-  reducedMotion.addEventListener('change', syncPreference);
-  syncPreference();
-});
+  const hash = onMotion ? '#motion' : '#style';
+  if (location.hash !== hash) history.replaceState(null, '', hash);
+}
+
+buttons.forEach(btn => btn.addEventListener('click', () => show(btn.dataset.tab === 'motion' ? 'motion' : 'style')));
+show(location.hash === '#motion' ? 'motion' : 'style');
+addEventListener('hashchange', () => show(location.hash === '#motion' ? 'motion' : 'style'));
 </script>
