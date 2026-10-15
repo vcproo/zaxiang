@@ -1,0 +1,128 @@
+---
+import { u } from '../url';
+import Base from '../layouts/Base.astro';
+import { tips } from '../tips';
+---
+<Base title="小技巧" description="一句话就能用上的 AI 小技巧，点开抽屉看详情与对比效果。">
+  <section class="wrap page tips-page">
+    <header class="page-head">
+      <p class="eyebrow rise">Field notes / 小技巧</p>
+      <h1 class="rise" style="animation-delay:.06s">一句话的小技巧，<br/>立刻能用。</h1>
+      <p class="intro rise" style="animation-delay:.12s">点开每一条，看具体用法；带对比效果的，可以切到「对比效果」看前后差别。</p>
+    </header>
+    <div class="list">
+    {tips.map((t, i) => (
+      <article class="tip reveal" data-tip>
+        <button type="button" class="tip-head" aria-expanded="false" aria-controls={`tip-drawer-${i}`}>
+          <span class="no mono">{String(i + 1).padStart(2, '0')}</span>
+          <span class="titles">
+            <strong>{t.title}</strong>
+            <span class="sum">{t.summary}</span>
+          </span>
+          <span class="chev" aria-hidden="true"><i></i><i></i></span>
+        </button>
+        <div class="drawer" id={`tip-drawer-${i}`}><div class="drawer-in"><div class="drawer-body">
+          {t.compare && (
+            <div class="seg" role="tablist" aria-label="内容切换">
+              <button type="button" class="seg-btn on" role="tab" aria-selected="true" data-pane="note">技巧</button>
+              <button type="button" class="seg-btn" role="tab" aria-selected="false" data-pane="cmp">对比效果</button>
+            </div>
+          )}
+          <div class="pane pane-note on" data-pane="note" role="tabpanel">
+            <ol>{t.points.map(p => <li>{p}</li>)}</ol>
+            {t.prompt && (
+              <div class="prompt">
+                <span class="mono">提示词可以这样写</span>
+                <code class="mono">{t.prompt}</code>
+              </div>
+            )}
+          </div>
+          {t.compare && (
+            <div class="pane pane-cmp" data-pane="cmp" role="tabpanel">
+              <p class="cmp-title">{t.compare.title}</p>
+              <div class="cmp-grid">
+                <figure>
+                  <img src={u(t.compare.before.src)} alt={t.compare.before.label} width={t.compare.before.w} height={t.compare.before.h} loading="lazy"/>
+                  <figcaption class="mono">{t.compare.before.label}</figcaption>
+                </figure>
+                <figure class="after">
+                  <img src={u(t.compare.after.src)} alt={t.compare.after.label} width={t.compare.after.w} height={t.compare.after.h} loading="lazy"/>
+                  <figcaption class="mono">{t.compare.after.label}</figcaption>
+                </figure>
+              </div>
+            </div>
+          )}
+        </div></div></div>
+      </article>
+    ))}
+    </div>
+    <p class="sd-note">遇到新的小招会随时补进来。</p>
+  </section>
+</Base>
+<style>
+.list{display:grid;gap:14px}
+.tip{border:1px solid var(--line);border-radius:var(--r);background:var(--bg-2);transition:border-color .3s}
+.tip.open{border-color:rgba(199,239,220,.3)}
+.tip-head{display:grid;grid-template-columns:56px 1fr 44px;gap:18px;align-items:center;width:100%;padding:26px 26px;background:none;border:0;cursor:pointer;text-align:left;font:inherit;color:inherit;border-radius:var(--r)}
+.no{font-size:30px;font-weight:600;line-height:1;color:transparent;-webkit-text-stroke:1px var(--fg-3);transition:color .3s,-webkit-text-stroke-color .3s}
+.tip-head:hover .no,.tip.open .no{color:var(--mint);-webkit-text-stroke-color:var(--mint)}
+.titles{display:grid;gap:6px;min-width:0}
+.titles strong{font-size:21px;font-weight:800;line-height:1.4}
+.sum{font-size:14.5px;color:var(--fg-3)}
+.chev{position:relative;width:44px;height:44px;border-radius:50%;border:1px solid var(--line-2);transition:all .4s var(--spring)}
+.chev i{position:absolute;left:50%;top:50%;width:14px;height:1.5px;margin:-.75px 0 0 -7px;background:currentColor;transition:transform .4s var(--spring)}
+.chev i:last-child{transform:rotate(90deg)}
+.tip-head:hover .chev{border-color:var(--mint)}
+.tip.open .chev{background:var(--mint);border-color:var(--mint);color:var(--ink)}
+.tip.open .chev i:last-child{transform:rotate(0)}
+.drawer{display:grid;grid-template-rows:0fr;transition:grid-template-rows .5s var(--ease)}
+.tip.open .drawer{grid-template-rows:1fr}
+.drawer-in{overflow:hidden;min-height:0}
+.drawer-body{padding:4px 26px 30px 100px}
+.seg{display:inline-flex;padding:4px;border:1px solid var(--line-2);border-radius:999px;margin:0 0 22px}
+.seg-btn{border:0;background:transparent;color:var(--fg-2);padding:7px 16px;border-radius:999px;font-weight:600;font-size:13.5px;cursor:pointer;transition:background .25s,color .25s}
+.seg-btn.on{background:var(--mint);color:var(--ink)}
+.pane{display:none}
+.pane.on{display:grid;gap:18px;align-content:start;animation:paneIn .45s var(--ease)}
+@keyframes paneIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+.pane ol{margin:0;padding:0;list-style:none;display:grid;gap:14px;counter-reset:p;color:var(--fg-2);font-size:15.5px;line-height:1.85}
+.pane ol li{position:relative;padding-left:34px;counter-increment:p}
+.pane ol li::before{content:counter(p,decimal-leading-zero);position:absolute;left:0;top:4px;font:500 11px var(--mono);color:var(--mint)}
+.prompt{display:grid;gap:8px}
+.prompt>span{font-size:11px;color:var(--fg-3);letter-spacing:.12em}
+.prompt code{padding:14px 18px;background:#100E14;border:1px solid var(--line);border-radius:12px;font-size:13.5px;color:var(--mint);line-height:1.8;overflow-wrap:anywhere}
+.cmp-title{margin:0;font-size:18px;font-weight:700}
+.cmp-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start}
+figure{margin:0}
+figure img{width:100%;height:auto;display:block;border-radius:12px;border:1px solid var(--line-2);background:var(--cream)}
+figure.after img{border-color:rgba(199,239,220,.5)}
+figcaption{font-size:12px;color:var(--fg-3);margin-top:10px;letter-spacing:.04em}
+figure.after figcaption{color:var(--mint)}
+@media(max-width:860px){.cmp-grid{grid-template-columns:1fr}}
+@media(max-width:640px){
+  .tip-head{grid-template-columns:1fr 40px;padding:22px 20px}
+  .no{display:none}
+  .chev{width:40px;height:40px}
+  .drawer-body{padding:0 20px 24px}
+}
+@media(prefers-reduced-motion:reduce){.drawer,.chev{transition:none}.pane.on{animation:none}}
+</style>
+<script>
+document.querySelectorAll<HTMLElement>('[data-tip]').forEach(tip => {
+  const head = tip.querySelector<HTMLButtonElement>('.tip-head')!;
+  head.addEventListener('click', () => {
+    const open = tip.classList.toggle('open');
+    head.setAttribute('aria-expanded', String(open));
+  });
+  const btns = [...tip.querySelectorAll<HTMLButtonElement>('.seg-btn')];
+  btns.forEach(btn => btn.addEventListener('click', () => {
+    const name = btn.dataset.pane;
+    btns.forEach(b => {
+      const on = b.dataset.pane === name;
+      b.classList.toggle('on', on);
+      b.setAttribute('aria-selected', String(on));
+    });
+    tip.querySelectorAll<HTMLElement>('.pane').forEach(p => p.classList.toggle('on', p.dataset.pane === name));
+  }));
+});
+</script>

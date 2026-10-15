@@ -4,65 +4,169 @@ import '../styles/global.css';
 import { SITE } from '../site';
 const { title, description = SITE.tagline } = Astro.props;
 const path = Astro.url.pathname.replace(import.meta.env.BASE_URL.replace(/\/$/, ''), '') || '/';
-const nav = [['/', '首页'], ['/tutorials/', '教程'], ['/baihuake/', '白话课'], ['/zhishi/', '知识网'], ['/motion/', '动效'], ['/tools/', '工具'], ['/about/', '关于']];
+const nav = [['/tutorials/', '教程'], ['/motion/', '动效'], ['/tools/', '工具'], ['/skill/', 'Skill'], ['/tips/', '小技巧'], ['/about/', '关于']];
+const [tagA, tagB] = SITE.tagline.replace(/。$/, '').split('，');
+// 六颗副眼：与 IP 一致，左右各三颗，内侧略低
+const eyes = [[4, 4], [10, 6.5], [16, 9], [30, 9], [36, 6.5], [42, 4]];
 ---
 <html lang="zh-CN"><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
 <title>{title ? `${title} · ${SITE.name}` : `${SITE.name} · AI 教程与笔记`}</title>
-<meta name="description" content={description}/><link rel="icon" href={u("/favicon.svg")} type="image/svg+xml"/>
+<meta name="description" content={description}/><meta name="theme-color" content="#141218"/>
+<link rel="icon" href={u("/favicon.svg")} type="image/svg+xml"/>
 <link rel="icon" href={u("/favicon-32.png")} type="image/png" sizes="32x32"/>
 <link rel="apple-touch-icon" href={u("/ip/avatar-256.png")}/></head>
 <body>
-<header class="top"><div class="wrap sd-bar">
-  <a href={u("/")} class="logo"><img class="logo-img" src={u("/ip/avatar-64.png")} width="32" height="32" alt=""/>蜘蛛侦探</a>
-  <nav>{nav.map(([h, l]) => <a href={u(h)} class={(h === '/' ? path === '/' : path.startsWith(h)) ? 'cur' : ''}>{l}</a>)}</nav>
-</div></header>
+<header class="hdr">
+  <div class="wrap hdr-in">
+    <a href={u("/")} class="brand" title="回到首页" aria-label="蜘蛛侦探，回到首页">
+      <span class="brand-ava"><img src={u("/ip/avatar-64.png")} width="34" height="34" alt=""/></span>
+      <span class="brand-txt"><b>蜘蛛侦探</b><small class="mono">SPIDER DETECTIVE</small></span>
+    </a>
+    <nav class="nav" aria-label="主导航">
+      {nav.map(([h, l]) => <a href={u(h)} class={path.startsWith(h) ? 'cur' : ''} aria-current={path.startsWith(h) ? 'page' : undefined}>{l}</a>)}
+    </nav>
+    <button type="button" class="sense" aria-label="阅读进度" title="阅读进度">
+      <svg viewBox="0 0 46 13" width="46" height="13" aria-hidden="true">{eyes.map(([x, y]) => <circle cx={x} cy={y} r="2.3"/>)}</svg>
+    </button>
+    <button type="button" class="menu-btn" aria-expanded="false" aria-controls="mnav"><span></span><span></span><b class="sr">菜单</b></button>
+  </div>
+  <div class="hdr-prog" aria-hidden="true"><i></i></div>
+</header>
+<div class="mnav" id="mnav" hidden>
+  <nav class="wrap" aria-label="移动端导航">
+    <a href={u("/")} class={path === '/' ? 'cur' : ''}><span class="mono">00</span>首页</a>
+    {nav.map(([h, l], i) => <a href={u(h)} class={path.startsWith(h) ? 'cur' : ''}><span class="mono">{String(i + 1).padStart(2, '0')}</span>{l}</a>)}
+  </nav>
+</div>
 <main><slot/></main>
-<div class="dangle" aria-hidden="true"><div class="silk"></div><svg class="bug" width="30" height="30" viewBox="0 0 30 30"><g stroke="#17150F" stroke-width="1.6" fill="none" stroke-linecap="round"><path d="M10 12 3 6M10 15 2 14M10 18 3 23M11 20 6 28M20 12 27 6M20 15 28 14M20 18 27 23M19 20 24 28"/></g><ellipse cx="15" cy="17" rx="6" ry="7" fill="#17150F"/><circle cx="15" cy="9.5" r="3.6" fill="#17150F"/><circle cx="13.6" cy="9" r=".9" fill="#F2C230"/><circle cx="16.4" cy="9" r=".9" fill="#F2C230"/></svg></div>
+<footer class="ftr">
+  <div class="wrap">
+    <div class="ftr-top">
+      <p class="ftr-line">{tagA}，<br/><span class="hl">{tagB}。</span></p>
+      <div class="ftr-cols">
+        <div><p class="eyebrow">站内</p>{nav.map(([h, l]) => <a href={u(h)}>{l}</a>)}</div>
+        <div><p class="eyebrow">找到我</p>{SITE.socials.map(s => <a href={s.url}>{s.name}</a>)}</div>
+      </div>
+    </div>
+    <div class="ftr-bot mono">
+      <a href={u("/")} class="ftr-brand"><img src={u("/ip/avatar-64.png")} width="22" height="22" alt=""/>© {new Date().getFullYear()} 蜘蛛侦探 · Spider Detective</a>
+      <span>END OF FILE ■</span>
+    </div>
+  </div>
+</footer>
 <script>
 const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
-// 吊着的小蜘蛛：随滚动往下放丝
-const dg = document.querySelector('.dangle') as HTMLElement;
+const root = document.documentElement;
+
+// 阅读进度：顶部细线 + 六颗副眼依次亮起
+const dots = [...document.querySelectorAll<SVGCircleElement>('.sense circle')];
+const bar = document.querySelector<HTMLElement>('.hdr-prog i')!;
+const hdr = document.querySelector<HTMLElement>('.hdr')!;
 let ticking = false;
-const setLen = () => { const h = document.documentElement; const p = h.scrollTop / Math.max(1, h.scrollHeight - innerHeight);
-  dg.style.setProperty('--len', (72 + p * (innerHeight * .5)) + 'px'); ticking = false; };
-addEventListener('scroll', () => { if (!ticking) { ticking = true; requestAnimationFrame(setLen); } }, { passive: true }); setLen();
-// 彩蛋：输入 spider / 蜘蛛侦探，或连点蜘蛛 5 次
-function toast(t: string) { const d = document.createElement('div'); d.className = 'toast'; d.textContent = t; document.body.append(d); setTimeout(() => d.remove(), 3200); }
+function progress() {
+  const max = root.scrollHeight - innerHeight;
+  const p = max > 40 ? Math.min(1, Math.max(0, scrollY / max)) : 0;
+  bar.style.transform = `scaleX(${p})`;
+  const lit = Math.round(p * dots.length);
+  dots.forEach((d, i) => d.classList.toggle('on', i < lit));
+  hdr.classList.toggle('scrolled', scrollY > 8);
+  ticking = false;
+}
+addEventListener('scroll', () => { if (!ticking) { ticking = true; requestAnimationFrame(progress); } }, { passive: true });
+addEventListener('resize', progress, { passive: true });
+progress();
+
+// 移动端菜单
+const menuBtn = document.querySelector<HTMLButtonElement>('.menu-btn')!;
+const mnav = document.getElementById('mnav')!;
+function setMenu(open: boolean) {
+  mnav.hidden = !open; menuBtn.setAttribute('aria-expanded', String(open));
+  document.body.classList.toggle('menu-open', open);
+}
+menuBtn.addEventListener('click', () => setMenu(mnav.hidden));
+mnav.addEventListener('click', e => { if ((e.target as HTMLElement).closest('a')) setMenu(false); });
+addEventListener('keydown', e => { if (e.key === 'Escape' && !mnav.hidden) setMenu(false); });
+matchMedia('(min-width: 961px)').addEventListener('change', e => { if (e.matches) setMenu(false); });
+
+// 进场：带 .reveal 的元素滚到视口时浮现
+const io = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } }), { rootMargin: '0px 0px -8% 0px' });
+document.querySelectorAll('.reveal').forEach(el => reduce ? el.classList.add('in') : io.observe(el));
+
+// 卡片手电筒：记录指针在卡片内的位置
+addEventListener('pointermove', e => {
+  const el = (e.target as HTMLElement).closest?.('.spot') as HTMLElement | null;
+  if (!el) return;
+  const r = el.getBoundingClientRect();
+  el.style.setProperty('--x', `${e.clientX - r.left}px`); el.style.setProperty('--y', `${e.clientY - r.top}px`);
+}, { passive: true });
+
+// 彩蛋：敲 spider，或连点副眼 5 次
+function toast(t: string) { const d = document.createElement('div'); d.className = 'toast'; d.textContent = t; document.body.append(d); setTimeout(() => d.remove(), 3400); }
 function egg() {
-  toast('🕷 你发现了一条隐藏线索：真相只有一个——多读几篇教程。');
+  toast('🔍 你发现了一条隐藏线索：真相只有一个——多读几篇教程。');
   if (reduce) return;
-  for (let i = 0; i < 18; i++) { const s = dg.querySelector('svg')!.cloneNode(true) as SVGElement; s.classList.add('rain');
-    s.style.left = Math.random() * 100 + 'vw'; s.style.animationDuration = 2 + Math.random() * 2 + 's'; s.style.setProperty('--r', (Math.random() * 720 - 360) + 'deg');
-    document.body.append(s); setTimeout(() => s.remove(), 4200); }
+  const s = document.createElement('div'); s.className = 'scan'; document.body.append(s); setTimeout(() => s.remove(), 1700);
+  dots.forEach((d, i) => { d.classList.remove('flash'); setTimeout(() => d.classList.add('flash'), i * 70); setTimeout(() => d.classList.remove('flash'), 900 + i * 70); });
 }
-let buf = ''; addEventListener('keydown', e => { if ((e.target as HTMLElement).matches('input,textarea')) return; buf = (buf + e.key.toLowerCase()).slice(-6); if (buf === 'spider') egg(); });
-let clicks = 0, t0 = 0; dg.querySelector('.bug')!.addEventListener('click', () => { const n = Date.now(); clicks = n - t0 < 600 ? clicks + 1 : 1; t0 = n; if (clicks >= 5) { clicks = 0; egg(); } });
-console.log('%c🕷 蜘蛛侦探在此。线索：在页面上敲下 spider。', 'font-size:14px;background:#F2C230;color:#17150F;padding:4px 8px');
-// 放大镜：悬停教程条目时出现（仅精确指针设备）
-if (!reduce && matchMedia('(pointer: fine)').matches) {
-  const lens = document.createElement('div'); lens.className = 'lens'; document.body.append(lens);
-  let x = 0, y = 0, raf = 0;
-  addEventListener('pointermove', e => { x = e.clientX; y = e.clientY; const on = !!(e.target as HTMLElement).closest('.row,.clue'); lens.classList.toggle('on', on);
-    document.body.style.cursor = ''; if (!raf) raf = requestAnimationFrame(() => { lens.style.left = x + 'px'; lens.style.top = y + 'px'; raf = 0; }); }, { passive: true });
-}
+let buf = '';
+addEventListener('keydown', e => { if ((e.target as HTMLElement).matches('input,textarea')) return; buf = (buf + e.key.toLowerCase()).slice(-6); if (buf === 'spider') egg(); });
+let clicks = 0, t0 = 0;
+document.querySelector('.sense')!.addEventListener('click', () => { const n = Date.now(); clicks = n - t0 < 600 ? clicks + 1 : 1; t0 = n; if (clicks >= 5) { clicks = 0; egg(); } });
+console.log('%c🔍 蜘蛛侦探在此。线索：在页面上敲下 spider。', 'font-size:14px;background:#C7EFDC;color:#27232D;padding:4px 8px;border-radius:4px');
 </script>
-<footer><div class="wrap foot">
-  <span>© {new Date().getFullYear()} 蜘蛛侦探 · Spider Detective</span>
-  <span class="links">{SITE.socials.map(s => <a href={s.url}>{s.name}</a>)}</span>
-</div></footer>
 <style>
-.top{position:sticky;top:0;z-index:10;background:rgba(243,239,230,.88);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
-.sd-bar{display:flex;justify-content:space-between;align-items:center;height:60px}
-.logo{font-weight:800;text-decoration:none;display:flex;align-items:center;gap:10px;font-size:18px}
-.logo-img{width:32px;height:32px;border-radius:50%;border:1.5px solid var(--ink);background:#F3EBDD;object-fit:cover;flex:none;transition:transform .3s var(--spring),box-shadow .25s}
-.logo:hover .logo-img{transform:scale(1.06);box-shadow:2px 2px 0 var(--pin)}
-.dot{display:none}
-.dot{width:12px;height:12px;border-radius:50%;background:var(--pin);box-shadow:0 0 0 2px var(--ink)}
-nav{display:flex;gap:4px} nav a{white-space:nowrap} nav a{text-decoration:none;padding:6px 12px;border-radius:var(--r);color:var(--ink-2);font-size:15px}
-nav a:hover{color:var(--ink);background:rgba(242,194,48,.15)}
-nav a.cur{color:var(--ink);background:var(--paper-2);font-weight:600}
-footer{border-top:1px solid var(--line);margin-top:96px;padding:28px 0;color:var(--ink-3);font-size:14px}
-.foot{display:flex;flex-wrap:wrap;gap:12px;justify-content:space-between}
-.links{display:flex;gap:16px;flex-wrap:wrap} .links a{text-decoration:none} .links a:hover{color:var(--ink)}
-@media(max-width:720px){.sd-bar{height:auto;min-height:60px;flex-wrap:wrap;padding-top:12px;padding-bottom:10px;gap:10px}.logo{white-space:nowrap}nav{width:100%;overflow-x:auto;padding-bottom:3px}nav a{flex:none;padding:6px 10px}}
+.hdr{position:sticky;top:0;z-index:40;transition:background .3s,border-color .3s;border-bottom:1px solid transparent}
+.hdr.scrolled,body.menu-open .hdr{background:rgba(20,18,24,.78);backdrop-filter:blur(14px) saturate(1.4);-webkit-backdrop-filter:blur(14px) saturate(1.4);border-bottom-color:var(--line)}
+.hdr-in{display:flex;align-items:center;gap:28px;height:var(--hdr)}
+.brand{display:flex;align-items:center;gap:12px;text-decoration:none;margin-right:auto}
+.brand-ava{width:38px;height:38px;border-radius:50%;background:var(--cream);display:grid;place-items:center;flex:none;
+  box-shadow:0 0 0 1px rgba(243,235,221,.2),0 0 0 5px rgba(199,239,220,0);transition:box-shadow .35s,transform .45s var(--spring)}
+.brand-ava img{width:34px;height:34px;border-radius:50%}
+.brand:hover .brand-ava{transform:rotate(-8deg) scale(1.06);box-shadow:0 0 0 1px rgba(243,235,221,.3),0 0 0 5px var(--mint-glow)}
+.brand-txt{display:grid;line-height:1.15}
+.brand-txt b{font-size:16.5px;font-weight:800;letter-spacing:.02em}
+.brand-txt small{font-size:9.5px;letter-spacing:.22em;color:var(--fg-3)}
+.nav{display:flex;gap:2px}
+.nav a{position:relative;padding:8px 13px;border-radius:999px;text-decoration:none;font-size:14.5px;color:var(--fg-2);white-space:nowrap;transition:color .2s,background .2s}
+.nav a:hover{color:var(--fg);background:rgba(243,235,221,.06)}
+.nav a.cur{color:var(--mint)}
+.nav a.cur::after{content:"";position:absolute;left:50%;bottom:1px;width:4px;height:4px;margin-left:-2px;border-radius:50%;background:var(--mint)}
+.sense{display:grid;place-items:center;width:62px;height:34px;border-radius:999px;border:1px solid var(--line-2);background:transparent;cursor:pointer;padding:0;transition:border-color .2s}
+.sense:hover{border-color:var(--mint)}
+.sense circle{fill:rgba(243,235,221,.18);transition:fill .35s,filter .35s}
+.sense circle.on{fill:var(--mint);filter:drop-shadow(0 0 3px rgba(199,239,220,.8))}
+.sense circle.flash{fill:var(--red)}
+.hdr-prog{position:absolute;left:0;right:0;bottom:-1px;height:2px;pointer-events:none}
+.hdr-prog i{display:block;height:100%;background:linear-gradient(90deg,transparent,var(--mint));transform-origin:left;transform:scaleX(0)}
+.menu-btn{display:none;position:relative;width:42px;height:42px;border-radius:50%;border:1px solid var(--line-2);background:transparent;cursor:pointer}
+.menu-btn span{position:absolute;left:12px;right:12px;height:1.5px;background:var(--fg);transition:transform .35s var(--spring),top .35s var(--spring)}
+.menu-btn span:nth-child(1){top:16px} .menu-btn span:nth-child(2){top:24px}
+.menu-btn[aria-expanded="true"] span:nth-child(1){top:20px;transform:rotate(45deg)}
+.menu-btn[aria-expanded="true"] span:nth-child(2){top:20px;transform:rotate(-45deg)}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+.mnav{position:fixed;inset:var(--hdr) 0 0;z-index:39;background:rgba(20,18,24,.97);backdrop-filter:blur(14px);overflow-y:auto}
+.mnav nav{display:grid;padding-top:20px;padding-bottom:40px}
+.mnav a{display:flex;align-items:baseline;gap:18px;padding:16px 0;border-bottom:1px solid var(--line);text-decoration:none;font-size:28px;font-weight:800;letter-spacing:-.01em;
+  animation:rise .5s var(--ease) both}
+.mnav a span{font-size:12px;color:var(--fg-3);font-weight:400}
+.mnav a.cur{color:var(--mint)}
+.mnav a:nth-child(2){animation-delay:.03s}.mnav a:nth-child(3){animation-delay:.06s}.mnav a:nth-child(4){animation-delay:.09s}
+.mnav a:nth-child(5){animation-delay:.12s}.mnav a:nth-child(6){animation-delay:.15s}.mnav a:nth-child(7){animation-delay:.18s}.mnav a:nth-child(8){animation-delay:.21s}
+:global(body.menu-open){overflow:hidden}
+
+.ftr{margin-top:140px;border-top:1px solid var(--line);background:linear-gradient(180deg,rgba(27,24,33,.6),transparent)}
+.ftr-top{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr);gap:48px;padding:72px 0 56px}
+.ftr-line{margin:0;font-size:clamp(26px,3.6vw,42px);font-weight:800;line-height:1.3;letter-spacing:-.02em}
+.ftr-cols{display:grid;grid-template-columns:1fr 1fr;gap:32px}
+.ftr-cols div{display:flex;flex-direction:column;gap:10px;align-items:flex-start}
+.ftr-cols .eyebrow{margin-bottom:6px}
+.ftr-cols a{color:var(--fg-2);text-decoration:none;font-size:15px;transition:color .2s}
+.ftr-cols a:hover{color:var(--mint)}
+.ftr-bot{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;padding:22px 0 28px;border-top:1px solid var(--line);font-size:12px;color:var(--fg-3)}
+.ftr-brand{display:inline-flex;align-items:center;gap:10px;text-decoration:none}
+.ftr-brand img{border-radius:50%;background:var(--cream)}
+
+@media(max-width:1060px){.nav a{padding:8px 10px;font-size:14px}.hdr-in{gap:16px}}
+@media(max-width:960px){.nav{display:none}.menu-btn{display:block}.sense{width:56px}}
+@media(max-width:720px){.ftr{margin-top:96px}.ftr-top{grid-template-columns:1fr;padding:56px 0 40px}.brand-txt small{display:none}}
 </style></body></html>

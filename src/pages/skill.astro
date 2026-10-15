@@ -1,0 +1,50 @@
+---
+import { u } from '../url';
+import Base from '../layouts/Base.astro';
+import { skills } from '../skills';
+---
+<Base title="Skill 档案" description="收录我用过的 Agent Skill：每个都有地址、用法和实际生成的演示效果。">
+  <section class="wrap page">
+    <header class="page-head">
+      <p class="eyebrow rise">Skill archive / Skill 档案</p>
+      <h1 class="rise" style="animation-delay:.06s">把做法写成手册，<br/>用时一句话调出。</h1>
+      <p class="intro rise" style="animation-delay:.12s">收录我用过的 Agent Skill。每个都记录三样东西：仓库地址、用法、以及它实际生成的演示效果。点开看详情。</p>
+    </header>
+    <div class="list">
+      {skills.map((s, i) => (
+        <a class="skill sd-card spot reveal" href={u(`/skill/${s.id}/`)} aria-label={`${s.name}（查看详情）`}>
+          <span class="thumb"><img src={u(s.thumb)} alt={`${s.name} 演示截图`} loading="lazy"/></span>
+          <span class="info">
+            <span class="catline mono"><span class="no">{String(i + 1).padStart(2, '0')}</span><span class="cat">{s.category}</span><span class="host">{s.repo.replace(/^https:\/\/github\.com\//, '').replace(/\/tree\/.*$/, '')}</span></span>
+            <strong>{s.name}</strong>
+            <span class="desc">{s.tagline}</span>
+            <span class="foot"><span class="mono">演示：{s.demo.title} · 可交互</span><span class="go">查看档案 <span>→</span></span></span>
+          </span>
+        </a>
+      ))}
+    </div>
+    <p class="sd-note">共 {skills.length} 个 Skill，遇到好用的会持续收录。</p>
+  </section>
+</Base>
+<style>
+.list{display:grid;gap:20px}
+.skill{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:0;align-items:stretch}
+.thumb{display:block;position:relative;overflow:hidden;background:#0b0b0b;min-height:300px;border-right:1px solid var(--line)}
+.thumb img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;transition:transform 1s var(--ease)}
+.skill:hover .thumb img{transform:scale(1.04)}
+.info{display:flex;flex-direction:column;gap:12px;padding:36px;min-width:0}
+.catline{display:flex;align-items:center;gap:12px;flex-wrap:wrap;font-size:11.5px;letter-spacing:.08em;color:var(--fg-3)}
+.no{color:var(--mint)}
+.cat{padding:4px 10px;border:1px solid var(--line-2);border-radius:999px;color:var(--fg-2)}
+.info strong{font-size:clamp(30px,3.6vw,42px);font-weight:800;line-height:1.15;letter-spacing:-.02em;margin-top:6px}
+.desc{font-size:16px;color:var(--fg-2);line-height:1.75}
+.foot{margin-top:auto;padding-top:20px;border-top:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;font-size:13px;color:var(--fg-3)}
+.foot .mono{font-size:12px}
+.go{color:var(--fg)} .go span{display:inline-block;transition:transform .35s var(--spring)}
+.skill:hover .go span{transform:translateX(5px)}
+@media(max-width:860px){
+  .skill{grid-template-columns:1fr}
+  .thumb{min-height:0;aspect-ratio:3/2;border-right:0;border-bottom:1px solid var(--line)}
+  .info{padding:26px}
+}
+</style>

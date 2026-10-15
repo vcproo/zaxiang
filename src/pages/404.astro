@@ -2,6 +2,25 @@
 import { u } from '../url';
 import Base from '../layouts/Base.astro';
 ---
-<Base title="线索断了"><section class="wrap" style="padding:120px 0;text-align:center">
-<p class="mono" style="color:var(--ink-3)">CASE 404</p><h1 style="font-family:var(--serif);font-size:44px">这条线索断了</h1>
-<p><a class="sd-btn" href={u("/tutorials/")}>回到教程档案</a></p></section></Base>
+<Base title="线索断了">
+<section class="wrap lost">
+  <p class="code" aria-hidden="true">4<svg class="face" viewBox="0 0 100 100"><circle cx="50" cy="50" r="47"/><g class="look"><path d="M24.5 54 H43.5 A11 8 0 1 1 24.5 54 Z"/><path d="M56.5 54 H75.5 A11 8 0 1 1 56.5 54 Z"/></g><g class="se"><circle cx="24" cy="37" r="2.6"/><circle cx="31" cy="40.5" r="2.6"/><circle cx="38" cy="44" r="2.6"/><circle cx="62" cy="44" r="2.6"/><circle cx="69" cy="40.5" r="2.6"/><circle cx="76" cy="37" r="2.6"/></g></svg>4</p>
+  <p class="eyebrow live">Case 404</p>
+  <h1>这条线索断了</h1>
+  <p class="sub">你要找的页面不在档案里。也许它被移走了，也许从来没有存在过。</p>
+  <div class="cta"><a class="sd-btn" href={u("/tutorials/")}>回到教程档案 <span class="arr">→</span></a><a class="sd-btn ghost" href={u("/")}>回首页</a></div>
+</section>
+</Base>
+<style>
+.lost{display:grid;justify-items:center;text-align:center;gap:18px;padding-top:120px;padding-bottom:40px}
+.code{display:flex;align-items:center;gap:.08em;margin:0 0 12px;font-size:clamp(110px,20vw,220px);font-weight:700;line-height:1;letter-spacing:-.04em;color:rgba(243,235,221,.16)}
+.face{width:.78em;height:.78em;overflow:visible}
+.face>circle{fill:var(--ink);stroke:rgba(243,235,221,.4);stroke-width:1.5}
+.face .look path,.face .se circle{fill:var(--mint)}
+.face .look{filter:drop-shadow(0 0 5px rgba(199,239,220,.45))}
+.look{animation:look 5s ease-in-out infinite}
+@keyframes look{0%,40%,100%{transform:none}50%,85%{transform:translateX(2px)}}
+h1{margin:0;font-size:clamp(32px,5vw,52px);font-weight:800;letter-spacing:-.02em}
+.sub{margin:0;color:var(--fg-2);max-width:28em}
+.cta{display:flex;gap:12px;flex-wrap:wrap;justify-content:center;margin-top:12px}
+</style>

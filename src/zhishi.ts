@@ -22,12 +22,12 @@ export interface WebEdge {
 }
 
 export const GROUPS: { id: NodeGroup; color: string; tip: string }[] = [
-  { id: '中心', color: '#E8B84A', tip: '网络锚点' },
-  { id: '基本功', color: '#C9A227', tip: '与 AI 对话的底层机制' },
-  { id: '生成与检索', color: '#6B9E78', tip: '产出与开卷作答' },
-  { id: '自主办事', color: '#5B8FA8', tip: '工具、协议与编排' },
-  { id: '远景', color: '#B85A4A', tip: '尚未落地的边界概念' },
-  { id: '延伸概念', color: '#8A8478', tip: '尚无专页，仅作线索' },
+  { id: '中心', color: '#C7EFDC', tip: '网络锚点' },
+  { id: '基本功', color: '#E8CFA0', tip: '与 AI 对话的底层机制' },
+  { id: '生成与检索', color: '#8ED1B4', tip: '产出与开卷作答' },
+  { id: '自主办事', color: '#A7B6F2', tip: '工具、协议与编排' },
+  { id: '远景', color: '#D95A49', tip: '尚未落地的边界概念' },
+  { id: '延伸概念', color: '#8F8798', tip: '尚无专页，仅作线索' },
 ];
 
 export const NODES: WebNode[] = [

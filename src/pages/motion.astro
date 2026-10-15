@@ -1,109 +1,126 @@
 ---
 import { u } from '../url';
 import Base from '../layouts/Base.astro';
-const styleSrc = u('/style-motion/styles.html') + '?embed=1';
-const motionSrc = u('/style-motion/motion.html') + '?embed=1';
+import '../styles/style-motion.css';
+import fontwarm from '../data/style-fontwarm.html?raw';
 ---
 <Base title="动效档案" description="17 种画风和 34 个动效，用来对齐叫法、挑选气质、复制给 AI。">
-  <section class="wrap motion-page">
-    <header class="intro">
-      <p class="mono eyebrow">MOTION ARCHIVE / 动效档案</p>
-      <h1>画风怎么叫，动效怎么动。</h1>
-      <p class="lead">做片子前先把叫法对齐。下面是 17 种能稳定做出来的画风，和 34 个拆到最小单元的动效。看中哪个，把那句话交给你的 AI。</p>
-      <div class="formula" aria-label="一句话说清一个镜头">
-        <div><code class="mono">画风</code><b>看起来像什么</b><span>暗场网格、蓝图、瑞士海报……</span></div>
-        <div><code class="mono">镜头</code><b>这镜完成什么任务</b><span>讲清关系、拆开零件、砸一个数字</span></div>
-        <div><code class="mono">动效</code><b>东西怎么动</b><span>砸字、描边生长、容器变形接力</span></div>
-      </div>
+  <link rel="stylesheet" href={u('/style-motion/fonts/fonts.css')}/>
+  <section class="wrap motion-page page">
+    <header class="page-head">
+      <p class="eyebrow rise">Motion archive / 动效档案</p>
+      <h1 class="rise" style="animation-delay:.06s">画风怎么叫，<br/>动效怎么动。</h1>
+      <p class="intro rise" style="animation-delay:.12s">做片子前先把叫法对齐。下面是 17 种能稳定做出来的画风，和 34 个拆到最小单元的动效。看中哪个，把那句话交给你的 AI。</p>
     </header>
-
-    <div class="archive" data-archive>
-      <div class="tabs" role="tablist" aria-label="档案分类">
-        <button type="button" class="sd-tag on" role="tab" id="tab-style" aria-controls="panel-style" aria-selected="true" data-tab="style">画风导览 · 17</button>
-        <button type="button" class="sd-tag" role="tab" id="tab-motion" aria-controls="panel-motion" aria-selected="false" data-tab="motion">动效词典 · 34</button>
-      </div>
-      <p class="hint" data-hint-style>点开色卡，复制「对 AI 这么说」。样张只展示气质，你的内容细节会不一样。</p>
-      <p class="hint" data-hint-motion hidden>放慢到 ¼× 看帧，拖滑杆改手感，再复制那一行调用码。也可以说「像 #10，但再慢一点」。</p>
-      <figure class="board">
-        <figcaption class="mono"><span data-cap>EVIDENCE · STYLE</span><span>LIVE DEMO</span></figcaption>
-        <div class="board-view">
-          <iframe
-            id="panel-style"
-            role="tabpanel"
-            aria-labelledby="tab-style"
-            title="画风导览"
-            src={styleSrc}
-            allow="clipboard-write"
-          ></iframe>
-          <iframe
-            id="panel-motion"
-            role="tabpanel"
-            aria-labelledby="tab-motion"
-            title="动效词典"
-            data-src={motionSrc}
-            allow="clipboard-write"
-            hidden
-          ></iframe>
-        </div>
-      </figure>
+    <div class="formula rise" style="animation-delay:.18s" aria-label="一句话说清一个镜头">
+      <div><code class="mono">01 · 画风</code><b>看起来像什么</b><span>暗场网格、蓝图、瑞士海报……</span></div>
+      <div><code class="mono">02 · 镜头</code><b>这镜完成什么任务</b><span>讲清关系、拆开零件、砸一个数字</span></div>
+      <div><code class="mono">03 · 动效</code><b>东西怎么动</b><span>砸字、描边生长、容器变形接力</span></div>
+      <p class="say"><span class="mono">一句话</span>这镜用<mark>蓝图</mark>，拆开<mark>一个零件</mark>，入场用<mark>描边生长</mark>。</p>
     </div>
-    <p class="note">舞台里的画面由代码实时绘制。开启系统「减少动态效果」时，画风样张会停在代表性的一帧。</p>
+
+    <div class="tabs" role="tablist" aria-label="档案分类">
+      <button type="button" class="seg-btn on" role="tab" id="tab-style" aria-controls="panel-style" aria-selected="true" data-tab="style">画风导览 · 17</button>
+      <button type="button" class="seg-btn" role="tab" id="tab-dict" aria-controls="panel-dict" aria-selected="false" data-tab="dict">动效词典 · 34</button>
+    </div>
+
+    <!-- 画风导览：原 styles.html，脚本在 public/style-motion/styles.js -->
+    <div class="panel" id="panel-style" role="tabpanel" aria-labelledby="tab-style">
+      <div class="panel-intro">
+        <p>17 种可以稳定做出来的画风。每种配一个它最擅长的场景，都是网页里实时画出来的。看中哪种，点开卡片复制那句「对 AI 这么说」，交给你自己的 AI，用这种画风做你自己的内容。<em>卡片里也写了适合讲什么、别用在哪、和谁容易混。</em></p>
+        <p class="aside">同一期可以按段落换两三种画风：开场用电影暗调，讲原理用蓝图，吐槽用新粗野。一整期只用一种，观众很快就看腻了。</p>
+      </div>
+      <div class="sm-style">
+        <nav class="filters" id="filters" aria-label="按气质筛选"><span class="lab">按气质</span></nav>
+        <section id="sec-live"><div class="sec-head"><h2>已经在用</h2><p>我们正片里常用的四种</p></div><div class="grid" id="grid-live"></div></section>
+        <section id="sec-new"><div class="sec-head"><h2>新增</h2><p>能稳定做出来，还没在正片里用过</p></div><div class="grid" id="grid-new"></div></section>
+        <dialog id="dlg" aria-labelledby="dlg-name">
+          <div class="dlg-wrap">
+            <button class="close" id="dlg-close" aria-label="关闭">×</button>
+            <div class="dlg">
+              <div class="stage" id="dlg-stage"></div>
+              <div class="info" id="dlg-info"></div>
+            </div>
+          </div>
+        </dialog>
+        <div class="fontwarm" aria-hidden="true" set:html={fontwarm}></div>
+      </div>
+      <div class="panel-foot sd-note">
+        <p>样张都是代码实时绘制，只用来展示气质。你的 AI 用同一种画风做别的内容，细节会不一样。</p>
+        <p>瑞士海报、数据新闻、蓝图里的数字和尺寸是示意数据；报纸拼贴里的年份和事件是真实的。</p>
+        <p>开启系统「减少动态效果」时，画风样张会停在代表性的一帧。</p>
+      </div>
+    </div>
+
+    <!-- 动效词典：原 motion.html，脚本在 public/style-motion/motion.js -->
+    <div class="panel" id="panel-dict" role="tabpanel" aria-labelledby="tab-dict" hidden>
+      <div class="sm-motion">
+        <div class="panel-intro">
+          <p>宣传片里常见的 33 个动效，每个都拆到<b>最小单元</b>。看到想要的效果，把它调到对的手感，复制那一行调用码，发给 Claude 或者合作的动效师。这样大家说「甩镜」的时候，指的就是同一个东西、同一组数值。#21–#33 拆自 ElevenLabs Agents Architect 发布片，默认参数用的是逐帧量出来的原片数值。</p>
+          <ol class="steps">
+            <li><b>放慢看。</b>切到 ¼× 或 0.1×，或者按 ◀ ▶ 一帧一帧走，看帧和帧之间到底发生了什么。</li>
+            <li><b>调参数。</b>拖滑杆改时长、曲线、强度。松手后会从头重播一次。</li>
+            <li><b>复制调用码。</b>一行文字，带编号和全部参数，直接发出去。也可以说「像 #10，但再慢一点」。</li>
+          </ol>
+          <p class="legend">名字旁边的标签说明这个叫法从哪来：<span class="term std">通用叫法</span>行业里本来就这么叫，拿去搜教程、跟别的设计师说都对得上；<span class="term en">英文通用</span>英文是通用叫法，中文是翻译过来的；<span class="term own">自拟叫法</span>原本没有统一说法，是这本词典起的名字。</p>
+        </div>
+        <div class="bar">
+          <nav id="nav" aria-label="动效分类"></nav>
+          <div class="glob">全部速度
+            <div class="seg" id="gspeed"></div>
+            <button type="button" class="tbtn" id="gpause">全部暂停</button>
+            <button type="button" class="tbtn" id="gplay">全部播放</button>
+          </div>
+        </div>
+        <div id="app"></div>
+        <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs id="fxdefs"></defs></svg>
+      </div>
+      <p class="panel-foot sd-note">时间按 30 帧/秒计。每个动效的帧数显示在播放条右边，比如「第 06 帧 / 13」表示整个动作 13 帧走完。舞台是 960×540 的逻辑画面，位移、震屏这些像素值都按这个尺寸算，放到 1920×1080 成片里要乘 2。</p>
+    </div>
   </section>
+  <script is:inline>
+  // 两个页签：#style 画风导览，#dict 动效词典（旧链接 #motion 和动效分类锚点也落到词典）。
+  // 内联同步执行，首屏就是正确的页签，不会先闪一下画风页。
+  (function () {
+    var tabs = [].slice.call(document.querySelectorAll('[data-tab]'));
+    var panels = { style: document.getElementById('panel-style'), dict: document.getElementById('panel-dict') };
+    var DICT = ['#dict', '#motion', '#curves', '#text', '#texture', '#morph', '#trans'];
+    function show(name, setHash) {
+      Object.keys(panels).forEach(function (k) { panels[k].hidden = k !== name; });
+      tabs.forEach(function (t) { var on = t.dataset.tab === name; t.classList.toggle('on', on); t.setAttribute('aria-selected', String(on)); });
+      if (setHash) history.replaceState(null, '', '#' + name);
+    }
+    function fromHash() { return DICT.indexOf(location.hash) >= 0 ? 'dict' : 'style'; }
+    tabs.forEach(function (t) { t.addEventListener('click', function () { show(t.dataset.tab === 'dict' ? 'dict' : 'style', true); }); });
+    show(fromHash(), false);
+    addEventListener('hashchange', function () { if (location.hash === '#style' || DICT.indexOf(location.hash) >= 0) show(fromHash(), false); });
+  })();
+  </script>
+  <script is:inline defer src={u('/style-motion/lib/three.min.js')}></script>
+  <script is:inline defer src={u('/style-motion/styles.js')}></script>
+  <script is:inline defer src={u('/style-motion/motion.js')}></script>
 </Base>
-<style is:global>
-.motion-page{padding-top:48px;padding-bottom:8px}
-.motion-page .eyebrow{font-size:12px;color:var(--ink-3);letter-spacing:.12em;margin:0 0 12px}
-.motion-page h1{font-family:var(--serif);font-size:clamp(32px,5vw,52px);line-height:1.25;margin:0 0 16px}
-.motion-page .lead{color:var(--ink-2);max-width:40em;margin:0 0 28px;font-size:18px}
-.motion-page .formula{margin:0 0 36px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));border:1.5px solid var(--ink);border-radius:var(--r);background:#fbf9f4;box-shadow:4px 4px 0 var(--pin);overflow:hidden}
-.motion-page .formula > div{padding:16px 18px;display:grid;gap:4px;min-width:0}
-.motion-page .formula > div + div{border-left:1px solid var(--line)}
-.motion-page .formula code{font-size:11px;color:var(--ink-3);letter-spacing:.08em}
-.motion-page .formula b{font-family:var(--serif);font-size:20px}
-.motion-page .formula span{font-size:13px;color:var(--ink-2)}
-.motion-page .tabs{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 12px}
-.motion-page .tabs button{font:inherit;cursor:pointer}
-.motion-page .hint{font-size:14px;color:var(--ink-3);margin:0 0 14px}
-.motion-page .board{margin:0;background:#fbf9f4;border:1.5px solid var(--ink);border-radius:var(--r);box-shadow:4px 4px 0 var(--pin);overflow:hidden}
-.motion-page .board figcaption{display:flex;justify-content:space-between;gap:12px;padding:8px 14px;border-bottom:1px solid var(--line);background:var(--paper-2);font-size:11px;letter-spacing:.12em;color:var(--ink-3)}
-.motion-page .board-view{height:min(78vh,900px);min-height:560px;background:var(--paper)}
-.motion-page .board iframe{width:100%;height:100%;border:0;display:block;background:var(--paper)}
-.motion-page .board iframe[hidden]{display:none}
-.motion-page .note{font-size:13px;color:var(--ink-3);margin-top:18px}
-@media(max-width:720px){
-  .motion-page{padding-top:28px}
-  .motion-page .formula{grid-template-columns:1fr}
-  .motion-page .formula > div + div{border-left:0;border-top:1px solid var(--line)}
-  .motion-page .board-view{height:70vh;min-height:480px}
-}
+<style>
+.formula{margin:0 0 72px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+.formula>div{padding:22px 24px;display:grid;gap:6px;min-width:0;border:1px solid var(--line);border-radius:var(--r);background:var(--bg-2)}
+.formula code{font-size:11px;color:var(--mint);letter-spacing:.12em}
+.formula b{font-size:21px;font-weight:800}
+.formula span{font-size:14px;color:var(--fg-2)}
+.say{grid-column:1/-1;margin:4px 0 0;font-size:16px;color:var(--fg-2)}
+.say .mono{font-size:11px;letter-spacing:.12em;color:var(--fg-3);margin-right:14px}
+.say mark{background:none;color:var(--mint);font-weight:700;padding:0 2px}
+.tabs{position:relative;z-index:6;display:inline-flex;padding:4px;margin-bottom:32px;border:1px solid var(--line-2);border-radius:999px;background:var(--bg-2)}
+.seg-btn{border:0;background:transparent;color:var(--fg-2);padding:9px 18px;border-radius:999px;font-weight:600;font-size:14.5px;cursor:pointer;transition:background .25s,color .25s}
+.seg-btn:hover{color:var(--fg)}
+.seg-btn.on{background:var(--mint);color:var(--ink)}
+.panel-intro{display:grid;gap:16px;max-width:48em;margin-bottom:28px;color:var(--fg-2);font-size:16px}
+.panel-intro p{margin:0}
+.panel-intro em{font-style:normal;color:var(--fg-3)}
+.panel-intro b{color:var(--fg)}
+.panel-intro .aside{font-size:14.5px;color:var(--fg-3);border-left:2px solid var(--mint);padding-left:14px}
+.panel-foot{display:grid;gap:4px;margin-top:40px;padding-top:18px;border-top:1px solid var(--line)}
+.panel-foot p{margin:0}
+@media(max-width:720px){.formula{grid-template-columns:1fr;margin-bottom:48px}}
+/* fonts.css 里的 JetBrains Mono 是演示用的子集，站点自身的等宽字不用它 */
+:global(body){--mono:"Cascadia Code","SF Mono",Consolas,Menlo,monospace}
 </style>
-<script>
-const root = document.querySelector<HTMLElement>('[data-archive]')!;
-const buttons = [...root.querySelectorAll<HTMLButtonElement>('[data-tab]')];
-const styleFrame = document.getElementById('panel-style') as HTMLIFrameElement;
-const motionFrame = document.getElementById('panel-motion') as HTMLIFrameElement;
-const hintStyle = root.querySelector<HTMLElement>('[data-hint-style]')!;
-const hintMotion = root.querySelector<HTMLElement>('[data-hint-motion]')!;
-const cap = root.querySelector<HTMLElement>('[data-cap]')!;
-
-function show(name: 'style' | 'motion') {
-  const onMotion = name === 'motion';
-  if (onMotion && !motionFrame.src) motionFrame.src = motionFrame.dataset.src || '';
-  styleFrame.hidden = onMotion;
-  motionFrame.hidden = !onMotion;
-  hintStyle.hidden = onMotion;
-  hintMotion.hidden = !onMotion;
-  cap.textContent = onMotion ? 'EVIDENCE · MOTION' : 'EVIDENCE · STYLE';
-  buttons.forEach(btn => {
-    const selected = btn.dataset.tab === name;
-    btn.setAttribute('aria-selected', String(selected));
-    btn.classList.toggle('on', selected);
-  });
-  const hash = onMotion ? '#motion' : '#style';
-  if (location.hash !== hash) history.replaceState(null, '', hash);
-}
-
-buttons.forEach(btn => btn.addEventListener('click', () => show(btn.dataset.tab === 'motion' ? 'motion' : 'style')));
-show(location.hash === '#motion' ? 'motion' : 'style');
-addEventListener('hashchange', () => show(location.hash === '#motion' ? 'motion' : 'style'));
-</script>

@@ -1,0 +1,108 @@
+---
+import { u } from '../../url';
+import Base from '../../layouts/Base.astro';
+import { skills } from '../../skills';
+
+export function getStaticPaths() {
+  return skills.map(s => ({ params: { id: s.id }, props: { s } }));
+}
+const { s } = Astro.props;
+const demoSrc = u(s.demo.path);
+const repoPath = s.repo.replace(/^https:\/\/github\.com\//, '');
+---
+<Base title={`${s.name} · Skill 档案`} description={s.tagline}>
+  <article class="wrap page detail">
+    <a class="back mono rise" href={u('/skill/')}>← Skill 档案</a>
+    <header class="page-head">
+      <p class="eyebrow rise">Skill · {s.category}</p>
+      <h1 class="rise" style="animation-delay:.06s">{s.name}</h1>
+      <p class="intro rise" style="animation-delay:.12s">{s.tagline}</p>
+      <p class="more-intro rise" style="animation-delay:.18s">{s.intro}</p>
+    </header>
+
+    <div class="cols">
+      <section class="sec reveal">
+        <h2><span class="mono">01</span>地址</h2>
+        <a class="repo sd-card spot" href={s.repo} target="_blank" rel="noopener noreferrer">
+          <svg viewBox="0 0 16 16" width="22" height="22" aria-hidden="true"><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+          <span><b>github.com/{repoPath}</b><small class="mono">在新标签页打开 ↗</small></span>
+        </a>
+        <div class="install">
+          <span class="mono">安装</span>
+          <code class="mono" data-copy>{s.install}</code>
+          <button type="button" class="copy mono" data-copy-btn>复制</button>
+        </div>
+      </section>
+
+      <section class="sec reveal">
+        <h2><span class="mono">02</span>用法</h2>
+        <ol class="steps">
+          {s.usage.map((it, i) => (
+            <li>
+              <span class="n mono">{String(i + 1).padStart(2, '0')}</span>
+              <div class="body">
+                <strong>{it.title}</strong>
+                <p>{it.text}</p>
+                {it.code && <code class="mono">{it.code}</code>}
+              </div>
+            </li>
+          ))}
+        </ol>
+      </section>
+    </div>
+
+    <section class="sec demo reveal">
+      <h2><span class="mono">03</span>演示效果 · {s.demo.title}</h2>
+      <p class="demo-cap">{s.demo.caption}</p>
+      <figure class="board">
+        <figcaption class="mono"><span class="dots" aria-hidden="true"><i></i><i></i><i></i></span><span>EVIDENCE · DEMO</span><span class="live">LIVE DEMO</span></figcaption>
+        <div class="board-view">
+          <iframe title={`${s.name} 演示：${s.demo.title}`} src={demoSrc} loading="lazy"></iframe>
+        </div>
+      </figure>
+      <p class="sd-note">演示是这个 Skill 实际生成的独立 HTML，页面里的明暗切换、角度滑杆、转速控制都能直接操作。<a href={demoSrc} target="_blank" rel="noopener noreferrer">新窗口打开 ↗</a></p>
+    </section>
+  </article>
+</Base>
+<style>
+.back{display:inline-block;font-size:12.5px;letter-spacing:.06em;color:var(--fg-2);text-decoration:none;margin-bottom:32px;transition:color .2s}
+.back:hover{color:var(--mint)}
+.more-intro{font-size:15.5px;color:var(--fg-3);margin:0;max-width:46em;line-height:1.85}
+.cols{display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr);gap:48px;align-items:start}
+.sec h2{display:flex;align-items:baseline;gap:14px;font-size:26px;font-weight:800;margin:0 0 22px;letter-spacing:-.01em}
+.sec h2 .mono{font-size:12px;color:var(--mint);letter-spacing:.1em}
+.repo{display:flex;align-items:center;gap:16px;padding:22px 24px}
+.repo span{display:grid;gap:4px;min-width:0}
+.repo b{font-family:var(--mono);font-size:14px;font-weight:600;overflow-wrap:anywhere}
+.repo small{font-size:11.5px;color:var(--fg-3)}
+.install{display:flex;align-items:center;gap:10px;margin-top:14px;padding:8px 8px 8px 18px;border:1px solid var(--line);border-radius:999px;background:#100E14}
+.install>span{font-size:11px;color:var(--fg-3);letter-spacing:.12em;flex:none}
+.install code{flex:1;min-width:0;font-size:13px;color:var(--mint);overflow-x:auto;white-space:nowrap}
+.copy{flex:none;border:0;border-radius:999px;background:var(--mint);color:var(--ink);font-size:12px;padding:8px 14px;cursor:pointer;font-weight:600}
+.steps{list-style:none;padding:0;margin:0;display:grid;gap:12px}
+.steps li{display:grid;grid-template-columns:40px 1fr;gap:12px;padding:20px 22px;border:1px solid var(--line);border-radius:var(--r);background:var(--bg-2)}
+.steps .n{color:var(--mint);font-size:12px;padding-top:4px}
+.steps .body{display:grid;gap:8px;min-width:0}
+.steps strong{font-size:18px;line-height:1.4}
+.steps p{margin:0;font-size:15px;color:var(--fg-2);line-height:1.8}
+.steps code{justify-self:start;max-width:100%;padding:8px 14px;background:#100E14;border:1px solid var(--line);border-radius:10px;font-size:13px;color:var(--mint);overflow-wrap:anywhere}
+.demo{margin-top:96px}
+.demo-cap{font-size:16px;color:var(--fg-2);margin:0 0 24px;line-height:1.8;max-width:46em}
+.board{margin:0;border:1px solid var(--line-2);border-radius:20px;overflow:hidden;background:var(--bg-2);box-shadow:0 40px 100px -50px rgba(0,0,0,.9)}
+.board figcaption{display:flex;align-items:center;gap:14px;padding:12px 18px;border-bottom:1px solid var(--line);font-size:11px;letter-spacing:.14em;color:var(--fg-3)}
+.dots{display:flex;gap:6px}.dots i{width:9px;height:9px;border-radius:50%;background:rgba(243,235,221,.14)}
+.board .live{margin-left:auto;display:flex;align-items:center;gap:8px;color:var(--mint)}
+.board .live::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--red);animation:live 1.8s ease-in-out infinite}
+.board-view{height:min(80vh,900px);min-height:520px;background:#0b0b0b}
+.board iframe{width:100%;height:100%;border:0;display:block}
+.sd-note a{color:var(--fg-2)} .sd-note a:hover{color:var(--mint)}
+@media(max-width:960px){.cols{grid-template-columns:1fr;gap:64px}}
+@media(max-width:640px){.board-view{height:72vh;min-height:440px}.steps li{grid-template-columns:28px 1fr;padding:18px}.install>span{display:none}}
+</style>
+<script>
+document.querySelectorAll<HTMLButtonElement>('[data-copy-btn]').forEach(btn => btn.addEventListener('click', async () => {
+  const code = btn.parentElement!.querySelector('[data-copy]')!.textContent || '';
+  try { await navigator.clipboard.writeText(code); btn.textContent = '已复制'; } catch { btn.textContent = '复制失败'; }
+  setTimeout(() => btn.textContent = '复制', 1600);
+}));
+</script>

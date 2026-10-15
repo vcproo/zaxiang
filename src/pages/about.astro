@@ -1,39 +1,62 @@
 ---
-import { u } from '../url';
 import Base from '../layouts/Base.astro';
 import IpFigure from '../components/IpFigure.astro';
 import { SITE } from '../site';
+const topics = ['提示词与上下文工程', 'AI Agent 与自动化工作流', '本地模型部署与开源工具', 'AI 产品拆解与实战案例'];
 ---
 <Base title="关于">
-<section class="wrap about">
-  <h1>关于蜘蛛侦探</h1>
-  <div class="about-grid">
-    <div class="portrait">
-      <IpFigure variant="about" src="/ip/character-front.webp" alt="蜘蛛侦探标准立绘" width=420 height=490 caption="标准立绘 · 观察态" />
+<section class="wrap page about">
+  <div class="grid">
+    <div class="portrait rise">
+      <IpFigure variant="about" src="/ip/character-front.webp" alt="蜘蛛侦探标准立绘" width={420} height={497} caption="标准立绘 · 观察态" />
+      <dl class="profile mono">
+        <div><dt>代号</dt><dd>蜘蛛侦探 · Spider Detective</dd></div>
+        <div><dt>性格</dt><dd>严肃 · 克制 · 好奇 · 可靠</dd></div>
+        <div><dt>特长</dt><dd>总能察觉被别人忽略的小线索</dd></div>
+      </dl>
     </div>
-    <div class="prose">
-      <p>你好，我是「蜘蛛侦探」。像蜘蛛织网一样，我把零散的 AI 知识点连成一张能用的网；像侦探查案一样，我对每个新工具都先问一句：它到底是怎么做到的？</p>
-      <p>这个网站是我的 AI 教程档案馆。每篇教程都会写清楚适用场景、准备工作和完整步骤，尽量让你读完就能动手。</p>
-      <h2>这里会写什么</h2>
-      <ul><li>提示词与上下文工程</li><li>AI Agent 与自动化工作流</li><li>本地模型部署与开源工具</li><li>AI 产品拆解与实战案例</li></ul>
-      <h2>找到我</h2>
-      <p class="social">{SITE.socials.map(s => <a class="sd-tag" href={s.url}>{s.name}</a>)}</p>
-      <p class="note">合作与投稿：<span class="mono">hello@example.com</span></p>
+    <div class="text">
+      <header class="page-head">
+        <p class="eyebrow rise">About / 关于</p>
+        <h1 class="rise" style="animation-delay:.06s">关于蜘蛛侦探</h1>
+      </header>
+      <div class="body rise" style="animation-delay:.12s">
+        <p class="lead">你好，我是「蜘蛛侦探」。像蜘蛛织网一样，我把零散的 AI 知识点连成一张能用的网；像侦探查案一样，我对每个新工具都先问一句：<span class="hl">它到底是怎么做到的？</span></p>
+        <p>这个网站是我的 AI 教程档案馆。每篇教程都会写清楚适用场景、准备工作和完整步骤，尽量让你读完就能动手。</p>
+      </div>
+      <section class="sec reveal">
+        <h2>这里会写什么</h2>
+        <ul class="topics">{topics.map((t, i) => <li class="sd-card"><span class="mono">{String(i + 1).padStart(2, '0')}</span>{t}</li>)}</ul>
+      </section>
+      <section class="sec reveal">
+        <h2>找到我</h2>
+        <p class="social">{SITE.socials.map(s => <a class="sd-chip" href={s.url}>{s.name}</a>)}</p>
+        <p class="mail">合作与投稿：<span class="mono">hello@example.com</span></p>
+      </section>
     </div>
   </div>
 </section>
 </Base>
 <style>
-.about{max-width:900px}
-h1{font-family:var(--serif);font-size:44px;margin:56px 0 28px}
-.about-grid{display:grid;grid-template-columns:240px 1fr;gap:40px;align-items:start}
-.portrait{margin:0;padding:22px 18px 16px;background:linear-gradient(180deg,#F7F3EA 0%,var(--paper-2) 100%);
-  border:1.5px solid var(--ink);border-radius:var(--r);box-shadow:4px 4px 0 var(--pin);overflow:visible;
-  transition:box-shadow .25s,transform .25s}
-.portrait:hover{box-shadow:6px 6px 0 var(--pin);transform:translate(-1px,-1px)}
-h2{font-family:var(--serif);font-size:26px;margin:40px 0 12px}
-.prose{font-size:18px;color:var(--ink-2)}
-.social{display:flex;flex-wrap:wrap;gap:10px}
-.note{font-size:15px;color:var(--ink-3)}
-@media(max-width:720px){.about-grid{grid-template-columns:1fr}.portrait{max-width:220px}}
+.grid{display:grid;grid-template-columns:minmax(0,.8fr) minmax(0,1.2fr);gap:72px;align-items:start}
+.portrait{position:sticky;top:calc(var(--hdr) + 32px);display:grid;gap:40px}
+.profile{margin:0;display:grid;border:1px solid var(--line);border-radius:var(--r);background:var(--bg-2);overflow:hidden}
+.profile div{display:grid;grid-template-columns:64px 1fr;gap:12px;padding:14px 20px;font-size:13px}
+.profile div+div{border-top:1px solid var(--line)}
+.profile dt{color:var(--fg-3);letter-spacing:.1em}
+.profile dd{margin:0;color:var(--fg)}
+.text .page-head{margin-bottom:32px}
+.body{display:grid;gap:18px;font-size:17px;color:var(--fg-2)}
+.body p{margin:0}
+.lead{font-size:21px;line-height:1.7;color:var(--fg);font-weight:500}
+.sec{margin-top:64px}
+.sec h2{font-size:26px;font-weight:800;margin:0 0 20px;letter-spacing:-.01em}
+.topics{list-style:none;padding:0;margin:0;display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.topics li{display:grid;gap:22px;padding:22px;font-size:16px;font-weight:600;line-height:1.5}
+.topics li span{font-size:11px;color:var(--mint);letter-spacing:.1em;font-weight:500}
+.social{display:flex;flex-wrap:wrap;gap:10px;margin:0}
+.mail{font-size:15px;color:var(--fg-3);margin:20px 0 0}
+.mail .mono{color:var(--fg-2)}
+@media(max-width:900px){.grid{grid-template-columns:1fr;gap:24px}.portrait{position:static;max-width:420px}}
+@media(max-width:560px){.topics{grid-template-columns:1fr}}
 </style>

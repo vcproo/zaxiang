@@ -79,14 +79,14 @@ const placed = [
 const data = { nodes: placed, edges: EDGES, groups: GROUPS, W, H, CX, CY };
 ---
 <Base title="知识蛛网" description="侦办级 AI 知识网络：分组扇区、同心环布局，乱中有序。">
-<section class="zh">
-  <header class="zh-head wrap">
-    <p class="zh-meta mono"><span>GRAPH</span><span>{NODES.length} NODES</span><span>{EDGES.length} EDGES</span></p>
-    <h1>知识网络</h1>
-    <p class="lead">像蜘蛛织网一样，把零散的 AI 知识点连成一张能用的网。节点按专案分组落在固定扇区——乱中有序；点选一条线索，邻域即亮。</p>
-  </header>
+<section class="zh page">
+  <div class="wrap"><header class="zh-head page-head">
+    <p class="eyebrow rise">Graph · {NODES.length} nodes · {EDGES.length} edges</p>
+    <h1 class="rise" style="animation-delay:.06s">知识网络</h1>
+    <p class="intro rise" style="animation-delay:.12s">像蜘蛛织网一样，把零散的 AI 知识点连成一张能用的网。节点按专案分组落在固定扇区——乱中有序；点选一条线索，邻域即亮。</p>
+  </header></div>
 
-  <div class="zh-stage wrap">
+<div class="zh-stage wrap rise" style="animation-delay:.18s">
     <div class="panel" id="panel">
       <div class="hud mono">
         <span id="hud-mode">OVERVIEW</span>
@@ -101,22 +101,22 @@ const data = { nodes: placed, edges: EDGES, groups: GROUPS, W, H, CX, CY };
     </div>
 
     <aside class="dossier">
-      <h2 class="mono">BRIEF</h2>
+      <h2 class="eyebrow">Brief</h2>
       <p>中心 <b>AI</b>。内环为白话课专案（C-01–C-10），按「基本功 → 生成与检索 → 自主办事 → 远景」顺时针展开。外环为延伸概念，落在相关专案外侧。</p>
-      <h2 class="mono">LEGEND</h2>
+      <h2 class="eyebrow">Legend</h2>
       <ul class="legend">
         {GROUPS.map(g => (
           <li><i style={`background:${g.color}`}></i><span><b class="mono">{g.id}</b>{g.tip}</span></li>
         ))}
       </ul>
-      <h2 class="mono">OPS</h2>
+      <h2 class="eyebrow">Ops</h2>
       <ul class="ops">
         <li>悬停：邻域高亮</li>
         <li>单击：聚焦</li>
         <li>再击：打开教程</li>
         <li>空白 / RESET：全景</li>
       </ul>
-      <a class="sd-btn" href={u('/baihuake/')}>按序列阅读白话课 →</a>
+      <a class="sd-btn" href={u('/tutorials/')}>阅读全部教程 <span class="arr">→</span></a>
     </aside>
   </div>
 </section>
@@ -296,7 +296,7 @@ resetBtn.addEventListener('click', () => setFocus(null));
 
 function draw(now) {
   const sx = cssW / data.W, sy = cssH / data.H;
-  ctx.fillStyle = '#10100E';
+  ctx.fillStyle = '#16141B';
   ctx.fillRect(0, 0, cssW, cssH);
 
   ctx.save();
@@ -308,13 +308,13 @@ function draw(now) {
 
   // 极淡同心环（结构参考，非装饰蜘蛛网）
   ctx.lineWidth = 1;
-  ctx.strokeStyle = 'rgba(255,255,255,0.04)';
+  ctx.strokeStyle = 'rgba(243,235,221,0.05)';
   [210, 318].forEach(rad => {
     ctx.beginPath(); ctx.arc(data.CX, data.CY, rad, 0, Math.PI * 2); ctx.stroke();
   });
 
   // 扇区分割虚线（极淡）
-  ctx.strokeStyle = 'rgba(232,184,74,0.06)';
+  ctx.strokeStyle = 'rgba(199,239,220,0.07)';
   [-110, -50, 20, 95, 175].forEach(deg => {
     const a = (deg - 90) * Math.PI / 180;
     ctx.beginPath();
@@ -332,15 +332,15 @@ function draw(now) {
     ctx.moveTo(a.x, a.y);
     ctx.lineTo(b.x, b.y);
     if (lit) {
-      ctx.strokeStyle = 'rgba(232,184,74,0.9)';
+      ctx.strokeStyle = 'rgba(199,239,220,0.9)';
       ctx.lineWidth = 1.6;
     } else if (dim) {
-      ctx.strokeStyle = 'rgba(255,255,255,0.035)';
+      ctx.strokeStyle = 'rgba(243,235,221,0.035)';
       ctx.lineWidth = 1;
     } else {
       // hub spokes lighter than cross links
       const hubEdge = a.kind === 'hub' || b.kind === 'hub';
-      ctx.strokeStyle = hubEdge ? 'rgba(200,190,170,0.14)' : 'rgba(200,190,170,0.28)';
+      ctx.strokeStyle = hubEdge ? 'rgba(243,235,221,0.12)' : 'rgba(243,235,221,0.26)';
       ctx.lineWidth = hubEdge ? 1 : 1.15;
     }
     ctx.stroke();
@@ -355,7 +355,7 @@ function draw(now) {
         const y = e.a.y + (e.b.y - e.a.y) * t;
         ctx.beginPath();
         ctx.arc(x, y, 2, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(242,194,48,${1 - t})`;
+        ctx.fillStyle = `rgba(199,239,220,${1 - t})`;
         ctx.fill();
       }
     }
@@ -379,7 +379,7 @@ function draw(now) {
     ctx.beginPath();
     ctx.arc(n.x, n.y, n.r, 0, Math.PI * 2);
     if (n.kind === 'hub') {
-      ctx.fillStyle = '#16140F';
+      ctx.fillStyle = '#16141B';
       ctx.fill();
       ctx.lineWidth = 2;
       ctx.strokeStyle = n.color;
@@ -389,7 +389,7 @@ function draw(now) {
       ctx.fillStyle = n.color;
       ctx.fill();
     } else if (n.kind === 'lesson') {
-      ctx.fillStyle = '#16140F';
+      ctx.fillStyle = '#16141B';
       ctx.fill();
       ctx.lineWidth = on ? 1.8 : 1.35;
       ctx.strokeStyle = n.color;
@@ -399,7 +399,7 @@ function draw(now) {
       ctx.fillStyle = n.color;
       ctx.fill();
     } else {
-      ctx.fillStyle = '#141310';
+      ctx.fillStyle = '#16141B';
       ctx.fill();
       ctx.setLineDash([2, 2]);
       ctx.lineWidth = 1.1;
@@ -412,11 +412,11 @@ function draw(now) {
     ctx.font = n.kind === 'hub'
       ? '600 12px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace'
       : '500 10.5px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace';
-    ctx.fillStyle = on ? '#F5F0E6' : '#B8B0A0';
+    ctx.fillStyle = on ? '#F3EBDD' : 'rgba(243,235,221,0.72)';
     ctx.fillText(n.label, n.x, ly);
     if (n.kind !== 'hub') {
       ctx.font = '400 9px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace';
-      ctx.fillStyle = on ? n.color : '#5E584E';
+      ctx.fillStyle = on ? n.color : 'rgba(243,235,221,0.32)';
       ctx.fillText(n.caseId, n.x, ly + 12);
     }
     ctx.globalAlpha = 1;
@@ -430,58 +430,37 @@ dirty = true; schedule();
 </script>
 
 <style>
-:global(body:has(.zh)) {
-  background: #0C0C0A;
-  background-image: radial-gradient(rgba(255,255,255,.028) 1px, transparent 1px);
-  background-size: 4px 4px;
-  color: #E4DED2;
-}
-:global(body:has(.zh) .top) { background: rgba(12,12,10,.92); border-bottom-color: #24221E; }
-:global(body:has(.zh) .top a) { color: #8A8478; }
-:global(body:has(.zh) .top a.cur) { background: #1A1814; color: #E8B84A; }
-:global(body:has(.zh) .logo) { color: #E4DED2; }
-:global(body:has(.zh) .logo-img) { border-color: #3A3630; }
-:global(body:has(.zh) footer) { border-top-color: #24221E; color: #5E584E; }
-:global(body:has(.zh) .dangle) { display: none; }
-
-.zh-head { padding-top: 36px; max-width: 640px; }
-.zh-meta { display: flex; gap: 16px; font-size: 10px; letter-spacing: .14em; color: #5E584E; margin: 0 0 12px; }
-.zh-meta span:first-child { color: #E8B84A; }
-.zh h1 { font-family: var(--serif); font-size: clamp(26px, 3.6vw, 36px); margin: 0 0 10px; font-weight: 700; color: #F3EEE4; }
-.lead { margin: 0; font-size: 15.5px; line-height: 1.7; color: #8A8478; }
-
-.zh-stage { display: grid; grid-template-columns: minmax(0, 1fr) 240px; gap: 24px; margin-top: 24px; padding-bottom: 48px; align-items: start; }
-.panel { position: relative; border: 1px solid #2A2824; border-radius: 2px; background: #10100E; overflow: hidden; }
-.hud { display: flex; align-items: center; gap: 8px; padding: 7px 12px; border-bottom: 1px solid #24221E;
-  font-size: 10px; letter-spacing: .14em; color: #5E584E; background: linear-gradient(180deg,#141210,#10100E); min-height: 32px; }
-.hud #hud-mode { color: #E8B84A; }
-.hud .sep { opacity: .4; }
+.zh-head{margin-bottom:40px}
+.zh-stage{display:grid;grid-template-columns:minmax(0,1fr) 260px;gap:24px;align-items:start}
+.panel{position:relative;border:1px solid var(--line);border-radius:var(--r);background:#16141B;overflow:hidden;box-shadow:0 40px 100px -50px rgba(0,0,0,.9)}
+.hud{display:flex;align-items:center;gap:8px;padding:10px 14px;border-bottom:1px solid var(--line);font-family:var(--mono);
+  font-size:10.5px;letter-spacing:.14em;color:var(--fg-3);background:var(--bg-2);min-height:44px}
+.hud #hud-mode{color:var(--mint)}
+.hud .sep{opacity:.4}
 .hud-spacer{flex:1}
-.hud-ip{width:24px;height:24px;border-radius:50%;border:1px solid #3A3630;opacity:.95;object-fit:cover;box-shadow:0 0 0 1px rgba(232,184,74,.2)}
-.hud-btn {  font: inherit; letter-spacing: .12em; font-size: 9px; color: #0C0C0A; background: #E8B84A;
-  border: 0; padding: 4px 8px; border-radius: 1px; cursor: pointer; }
-#g { display: block; width: 100%; height: auto; aspect-ratio: 1000 / 720; cursor: grab; touch-action: none; }
+.hud-ip{width:26px;height:26px;border-radius:50%;background:var(--cream);object-fit:cover}
+.hud-btn{font:inherit;letter-spacing:.12em;font-size:10px;color:var(--ink);background:var(--mint);border:0;padding:5px 10px;border-radius:999px;cursor:pointer}
+#g{display:block;width:100%;height:auto;aspect-ratio:1000 / 720;cursor:grab;touch-action:none}
 
-.tip { position: absolute; left: 0; top: 0; z-index: 5; width: 228px; padding: 11px 12px; pointer-events: none;
-  background: rgba(16,16,14,.96); border: 1px solid #333028; border-left: 2px solid #E8B84A; will-change: transform; }
-.tip .t-id { font-size: 9px; letter-spacing: .12em; color: #E8B84A; margin-bottom: 3px; }
-.tip .t-title { font-family: var(--serif); font-size: 16px; color: #F3EEE4; font-weight: 700; margin-bottom: 5px; }
-.tip .t-body { font-family: var(--sans); font-size: 12.5px; line-height: 1.5; color: #8A8478; margin-bottom: 6px; }
-.tip .t-act { font-size: 9px; letter-spacing: .1em; color: #5E584E; }
+.tip{position:absolute;left:0;top:0;z-index:5;width:236px;padding:12px 14px;pointer-events:none;border-radius:12px;
+  background:rgba(27,24,33,.96);border:1px solid var(--line-2);box-shadow:0 20px 40px -12px rgba(0,0,0,.7);will-change:transform}
+.tip :global(.t-id){font-family:var(--mono);font-size:9.5px;letter-spacing:.12em;color:var(--mint);margin-bottom:4px}
+.tip :global(.t-title){font-size:16px;color:var(--fg);font-weight:700;margin-bottom:5px}
+.tip :global(.t-body){font-size:12.5px;line-height:1.55;color:var(--fg-2);margin-bottom:8px}
+.tip :global(.t-act){font-family:var(--mono);font-size:9.5px;letter-spacing:.1em;color:var(--fg-3)}
 
-.dossier h2 { font-size: 10px; letter-spacing: .16em; color: #E8B84A; margin: 0 0 8px; font-weight: 600; }
-.dossier h2 + p, .dossier .ops { font-size: 13px; line-height: 1.6; color: #8A8478; margin: 0 0 20px; }
-.dossier b { color: #D8D0C0; font-weight: 600; }
-.legend { list-style: none; padding: 0; margin: 0 0 20px; display: flex; flex-direction: column; gap: 8px; }
-.legend li { display: flex; gap: 8px; font-size: 12px; color: #8A8478; }
-.legend i { width: 7px; height: 7px; border-radius: 50%; margin-top: 4px; flex: none; }
-.legend b { display: block; color: #C8C0B0; font-size: 10px; letter-spacing: .06em; }
-.ops { padding-left: 1.05em; }
-.ops li { margin-bottom: 3px; }
-.dossier .sd-btn { background: #E8B84A; color: #0C0C0A; border-color: #E8B84A; box-shadow: none; font-size: 13px; padding: 10px 16px; }
-.dossier .sd-btn:hover { box-shadow: none; filter: brightness(1.06); transform: none; }
+.dossier{display:grid;gap:10px;padding:24px;border:1px solid var(--line);border-radius:var(--r);background:var(--bg-2)}
+.dossier h2{margin:6px 0 0;font-size:11px}
+.dossier h2+p,.dossier .ops{font-size:13.5px;line-height:1.7;color:var(--fg-2);margin:0 0 10px}
+.dossier b{color:var(--fg);font-weight:600}
+.legend{list-style:none;padding:0;margin:0 0 10px;display:grid;gap:10px}
+.legend li{display:flex;gap:10px;font-size:12.5px;color:var(--fg-2);line-height:1.5}
+.legend i{width:8px;height:8px;border-radius:50%;margin-top:5px;flex:none}
+.legend b{display:block;font-size:12px}
+.ops{padding-left:1.1em}
+.ops li{margin-bottom:3px}
+.ops li::marker{color:var(--mint)}
+.dossier .sd-btn{justify-self:start;margin-top:6px;font-size:14px;padding:11px 18px}
 
-@media (max-width: 960px) {
-  .zh-stage { grid-template-columns: 1fr; }
-}
+@media(max-width:960px){.zh-stage{grid-template-columns:1fr}}
 </style>
