@@ -53,10 +53,10 @@ import fontwarm from '../data/style-fontwarm.html?raw';
     </div>
 
     <!-- 动效词典：原 motion.html，脚本在 public/style-motion/motion.js -->
-    <div class="panel" id="panel-dict" role="tabpanel" aria-labelledby="tab-dict" hidden>
+    <div class="panel" id="panel-dict" role="tabpanel" aria-labelledby="tab-dict" data-refs={u('/style-motion/refs')} hidden>
       <div class="sm-motion">
         <div class="panel-intro">
-          <p>宣传片里常见的 33 个动效，每个都拆到<b>最小单元</b>。看到想要的效果，把它调到对的手感，复制那一行调用码，发给 Claude 或者合作的动效师。这样大家说「甩镜」的时候，指的就是同一个东西、同一组数值。#21–#33 拆自 ElevenLabs Agents Architect 发布片，默认参数用的是逐帧量出来的原片数值。</p>
+          <p>宣传片里常见的 33 个动效，每个都拆到<b>最小单元</b>。看到想要的效果，把它调到对的手感，复制那一行调用码，发给 Claude 或者合作的动效师。这样大家说「甩镜」的时候，指的就是同一个东西、同一组数值。#21–#33 拆自 ElevenLabs Agents Architect 发布片，默认参数用的是逐帧量出来的原片数值。分类栏最后的「成片参考」是另外收来的成片短预览，用来对照，不是可调参数的最小单元。</p>
           <ol class="steps">
             <li><b>放慢看。</b>切到 ¼× 或 0.1×，或者按 ◀ ▶ 一帧一帧走，看帧和帧之间到底发生了什么。</li>
             <li><b>调参数。</b>拖滑杆改时长、曲线、强度。松手后会从头重播一次。</li>
@@ -84,7 +84,7 @@ import fontwarm from '../data/style-fontwarm.html?raw';
   (function () {
     var tabs = [].slice.call(document.querySelectorAll('[data-tab]'));
     var panels = { style: document.getElementById('panel-style'), dict: document.getElementById('panel-dict') };
-    var DICT = ['#dict', '#motion', '#curves', '#text', '#texture', '#morph', '#trans'];
+    var DICT = ['#dict', '#motion', '#curves', '#text', '#texture', '#morph', '#trans', '#refs'];
     function show(name, setHash) {
       Object.keys(panels).forEach(function (k) { panels[k].hidden = k !== name; });
       tabs.forEach(function (t) { var on = t.dataset.tab === name; t.classList.toggle('on', on); t.setAttribute('aria-selected', String(on)); });
@@ -99,6 +99,7 @@ import fontwarm from '../data/style-fontwarm.html?raw';
   <script is:inline defer src={u('/style-motion/lib/three.min.js')}></script>
   <script is:inline defer src={u('/style-motion/styles.js')}></script>
   <script is:inline defer src={u('/style-motion/motion.js')}></script>
+  <script is:inline defer src={u('/style-motion/refs.js')}></script>
 </Base>
 <style>
 .formula{margin:0 0 72px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}

@@ -337,6 +337,37 @@
 .sm-motion .glob .tbtn,.sm-motion .seg,.sm-motion .tb{border-radius:999px}
 .sm-motion .copy{border-radius:999px}
 
+/* ---------- 成片参考 ---------- */
+.sm-motion .ref-tools{display:flex;gap:12px;align-items:center;margin:0 0 16px}
+.sm-motion .ref-tools input{flex:1;max-width:420px;background:transparent;border:1px solid var(--line);border-radius:999px;padding:8px 14px}
+.sm-motion .ref-tools span,.sm-motion .ref-empty{color:var(--muted);font-size:13px}
+.sm-motion .ref-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:22px 14px}
+.sm-motion .ref{min-width:0}
+.sm-motion .ref .shot{position:relative;aspect-ratio:16/9;border-radius:14px;overflow:hidden;background:#000;border:1px solid var(--line)}
+.sm-motion .ref img,.sm-motion .ref video{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;background:#000}
+.sm-motion .ref video{opacity:0}
+.sm-motion .ref.is-on video{opacity:1}
+.sm-motion .ref .pills,.sm-motion .ref .clock{position:absolute;bottom:8px;z-index:1;pointer-events:none}
+.sm-motion .ref .pills{left:8px;display:flex;gap:6px}
+.sm-motion .ref .clock{right:8px}
+.sm-motion .ref .pill{background:rgba(0,0,0,.72);color:#fff;border-radius:999px;padding:2px 8px;font-size:12px}
+.sm-motion .ref .barline{position:absolute;left:10px;right:10px;bottom:4px;height:2px;background:rgba(255,255,255,.28);z-index:1;pointer-events:none}
+.sm-motion .ref .barline i{display:block;height:100%;background:#fff;transform:scaleX(0);transform-origin:left}
+.sm-motion .ref .play{position:absolute;right:12px;top:50%;transform:translateY(-50%);width:34px;height:34px;border:0;border-radius:50%;background:rgba(0,0,0,.45);color:#fff;cursor:pointer;z-index:2;padding:0}
+.sm-motion .ref .play svg{width:14px;height:14px;display:block;margin:0 auto}
+.sm-motion .ref.is-on .play{opacity:0}
+.sm-motion .ref.is-on:hover .play{opacity:1}
+.sm-motion .ref h3{margin:8px 2px 0;font-size:14.5px;font-weight:750;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sm-motion .ref .by,.sm-motion .ref .post{display:block;margin:1px 2px 0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sm-motion .ref .by{color:var(--muted);font-size:12px}
+.sm-motion .ref .post{color:var(--mint);font-size:12px;text-decoration:none}
+.sm-motion .ref .post:hover{text-decoration:underline}
+.sm-motion .ref details{margin-top:4px}
+.sm-motion .ref summary{cursor:pointer;color:var(--muted);font-size:12px}
+.sm-motion .ref pre{margin:6px 0 0;white-space:pre-wrap;word-break:break-word;font-size:12px;line-height:1.5;color:var(--fg);background:rgba(0,0,0,.28);border-radius:8px;padding:8px 10px;max-height:140px;overflow:auto}
+@media (max-width:1100px){.sm-motion .ref-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:640px){.sm-motion .ref-grid{grid-template-columns:1fr}.sm-motion .ref-tools{flex-direction:column;align-items:stretch}.sm-motion .ref-tools input{max-width:none}}
+
 /* ---------- 画风详情弹窗：只留一条滚动条 ----------
    打开时锁住页面滚动（滚动条样式和预留位置见 global.css）；宽屏下左侧样张固定，只有右侧说明栏在需要时滚动，关闭按钮始终在角上。 */
 html:has(.sm-style dialog[open]){overflow:hidden}

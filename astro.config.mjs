@@ -6,4 +6,12 @@ export default defineConfig({
   base: '/zaxiang',
   trailingSlash: 'always',
   output: 'static',
+  vite: {
+    server: {
+      watch: {
+        // 成片预览是静态媒体，不参与热更新，避免一次盯住上千个文件把开发服务撑爆
+        ignored: ['**/style-motion/refs/previews/**', '**/style-motion/refs/posters/**'],
+      },
+    },
+  },
 });
