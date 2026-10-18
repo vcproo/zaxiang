@@ -1,25 +1,29 @@
 ---
 import Base from '../layouts/Base.astro';
-import { tools } from '../tools';
+import { toolsFor } from '../tools';
+import { ui, langFromPath } from '../i18n';
+const lang = ((Astro.props.lang === 'en' || Astro.props.lang === 'zh') ? Astro.props.lang : langFromPath(Astro.url.pathname)) as 'zh' | 'en';
+const t = ui[lang];
+const tools = toolsFor(lang);
 ---
-<Base title="工具导航" description="蜘蛛侦探的工具导航，收藏实用工具与常用链接。">
+<Base lang={lang} title={t.toolsTitle} description={t.toolsDesc}>
   <section class="wrap page">
     <header class="page-head">
-      <p class="eyebrow rise">Toolkit / 工具档案</p>
-      <h1 class="rise" style="animation-delay:.06s">顺手的工具，放在这里。</h1>
-      <p class="intro rise" style="animation-delay:.12s">收藏实用工具与常用链接，需要时随手打开。</p>
+      <p class="eyebrow rise">{t.toolsEyebrow}</p>
+      <h1 class="rise" style="animation-delay:.06s">{t.toolsH1}</h1>
+      <p class="intro rise" style="animation-delay:.12s">{t.toolsIntro}</p>
     </header>
     <div class="grid">
       {tools.map((tool, i) => (
-        <a class="tool sd-card spot reveal" style={`--d:${i * .06}s`} href={tool.url} target="_blank" rel="noopener noreferrer" aria-label={`${tool.name}（在新标签页打开）`}>
+        <a class="tool sd-card spot reveal" style={`--d:${i * .06}s`} href={tool.url} target="_blank" rel="noopener noreferrer" aria-label={`${tool.name} (${t.toolsNewTab})`}>
           <div class="top"><span class="cat mono">{tool.category}</span><span class="arrow" aria-hidden="true">↗</span></div>
           <h2>{tool.name}</h2>
           <p>{tool.description}</p>
-          <div class="bottom mono"><span>{tool.domain}</span><span>打开工具</span></div>
+          <div class="bottom mono"><span>{tool.domain}</span><span>{t.toolsOpen}</span></div>
         </a>
       ))}
     </div>
-    <p class="sd-note">工具链接将在新标签页打开。</p>
+    <p class="sd-note">{t.toolsNote}</p>
   </section>
 </Base>
 <style>

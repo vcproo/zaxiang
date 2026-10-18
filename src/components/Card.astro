@@ -1,10 +1,12 @@
 ---
 import { u } from '../url';
-const { t, idx } = Astro.props;
+import { slugOf } from '../lib';
+import type { Lang } from '../i18n';
+const { t, idx, lang = 'zh' } = Astro.props as { t: { id: string; data: { date: Date; order?: number; kicker?: string; title: string; description: string; tags: string[]; level: string } }; idx: number; lang?: Lang };
 const d = t.data.date.toISOString().slice(0, 10);
 const no = t.data.order ?? idx;
 ---
-<a class="row spot" href={u(`/tutorials/${t.id}/`)} data-tags={t.data.tags.join(',')} data-text={(t.data.title + t.data.description + t.data.tags.join(' ')).toLowerCase()}>
+<a class="row spot" href={u(`/tutorials/${slugOf(t.id)}/`, lang)} data-tags={t.data.tags.join(',')} data-text={(t.data.title + t.data.description + t.data.tags.join(' ')).toLowerCase()}>
   <span class="no mono" aria-hidden="true">{no !== undefined ? String(no).padStart(2, '0') : '··'}</span>
   <span class="main">
     {t.data.kicker && <span class="kick mono">{t.data.kicker}</span>}

@@ -2,32 +2,23 @@
 import { u } from '../../url';
 import Base from '../../layouts/Base.astro';
 import { render } from 'astro:content';
-import { allTutorials } from '../../lib';
+import { tutorialPaths, slugOf } from '../../lib';
+import { ui, type Lang } from '../../i18n';
 export async function getStaticPaths() {
-  const all = await allTutorials();
-  return all.map((t, i) => {
-    let prev = all[i + 1], next = all[i - 1], total = 0;
-    if (t.data.series) {
-      const s = all.filter(x => x.data.series === t.data.series).sort((a, b) => (a.data.order ?? 0) - (b.data.order ?? 0));
-      const j = s.findIndex(x => x.id === t.id); prev = s[j - 1]; next = s[j + 1]; total = s.length;
-    }
-    const related = all.filter(x => x.id !== t.id && x.id !== prev?.id && x.id !== next?.id)
-      .map(x => ({ x, n: x.data.tags.filter(g => t.data.tags.includes(g)).length }))
-      .filter(r => r.n > 0).sort((a, b) => b.n - a.n).slice(0, 3).map(r => r.x);
-    return { params: { id: t.id }, props: { t, prev, next, total, related } };
-  });
+  return tutorialPaths('zh');
 }
-const { t, prev, next, total, related } = Astro.props;
+const { t, prev, next, total, related, lang = 'zh' } = Astro.props as { t: any; prev: any; next: any; total: number; related: any[]; lang?: Lang };
+const copy = ui[lang];
 const { Content, headings } = await render(t);
 const toc = headings.filter(h => h.depth === 2);
 const caseNo = t.data.order ? `CASE-${String(t.data.order).padStart(3, '0')}` : 'CASE';
 const pad = (n: number) => String(n).padStart(2, '0');
 ---
-<Base title={t.data.title} description={t.data.description}>
+<Base lang={lang} title={t.data.title} description={t.data.description}>
 <article class="art">
   <header class="wrap art-head">
     <div class="crumbs mono rise">
-      <a href={u("/tutorials/")}>← 教程档案</a>
+      <a href={u("/tutorials/", lang)}>{copy.crumb}</a>
       {t.data.series && <span>{t.data.series} · {pad(t.data.order ?? 0)} / {pad(total)}</span>}
     </div>
     {t.data.kicker && <p class="eyebrow rise" style="animation-delay:.04s">{t.data.kicker}</p>}
@@ -35,36 +26,36 @@ const pad = (n: number) => String(n).padStart(2, '0');
     <p class="desc rise" style="animation-delay:.14s">{t.data.description}</p>
     <p class="meta mono rise" style="animation-delay:.2s">
       <span>{caseNo}</span><span>{t.data.date.toISOString().slice(0, 10)}</span><span>{t.data.level}</span>
-      {t.data.tags.map(g => <a href={u(`/tutorials/?tag=${encodeURIComponent(g)}`)}>#{g}</a>)}
+      {t.data.tags.map(g => <a href={u(`/tutorials/?tag=${encodeURIComponent(g)}`, lang)}>#{g}</a>)}
     </p>
-    <div class="stamp" aria-hidden="true"><span>立案调查</span><small class="mono">{caseNo}</small></div>
+    <div class="stamp" aria-hidden="true"><span>{copy.filed}</span><small class="mono">{caseNo}</small></div>
   </header>
 
   <div class:list={['wrap', 'art-body', { 'no-toc': !toc.length }]}>
     {toc.length > 0 && (
       <aside class="toc">
-        <p class="eyebrow">目录</p>
+        <p class="eyebrow">{copy.toc}</p>
         <nav>{toc.map((h, i) => <a href={`#${h.slug}`}><span class="mono">{pad(i + 1)}</span>{h.text}</a>)}</nav>
       </aside>
     )}
     <div class="sheet">
-      <div class="sheet-top mono" aria-hidden="true"><span>{caseNo} · 档案正文</span><span>SPIDER DETECTIVE</span></div>
+      <div class="sheet-top mono" aria-hidden="true"><span>{caseNo} · {copy.sheet}</span><span>SPIDER DETECTIVE</span></div>
       <div class="prose"><Content/></div>
     </div>
   </div>
 
-  <nav class="wrap pn" aria-label="上一篇与下一篇">
-    {prev ? <a class="sd-card spot" href={u(`/tutorials/${prev.id}/`)}><span class="mono">← 上一篇</span><b>{prev.data.title}</b></a> : <span/>}
-    {next ? <a class="sd-card spot r" href={u(`/tutorials/${next.id}/`)}><span class="mono">下一篇 →</span><b>{next.data.title}</b></a> : <span/>}
+  <nav class="wrap pn" aria-label={copy.pnLabel}>
+    {prev ? <a class="sd-card spot" href={u(`/tutorials/${slugOf(prev.id)}/`, lang)}><span class="mono">{copy.prev}</span><b>{prev.data.title}</b></a> : <span/>}
+    {next ? <a class="sd-card spot r" href={u(`/tutorials/${slugOf(next.id)}/`, lang)}><span class="mono">{copy.next}</span><b>{next.data.title}</b></a> : <span/>}
   </nav>
 
   {related.length > 0 && (
     <section class="wrap board">
-      <div class="sec-head"><div><p class="eyebrow">Related leads</p><h2>关联线索</h2></div></div>
+      <div class="sec-head"><div><p class="eyebrow">{copy.relatedEyebrow}</p><h2>{copy.relatedH}</h2></div></div>
       <div class="cork">
         <svg class="strings" aria-hidden="true"></svg>
-        <div class="clue me"><b class="mono">本案 · {caseNo}</b>{t.data.title}</div>
-        {related.map((r, i) => <a class={`clue n${i}`} href={u(`/tutorials/${r.id}/`)}><b class="mono">{r.data.tags.filter(g => t.data.tags.includes(g)).map(g => '#' + g).join(' ')}</b>{r.data.title}</a>)}
+        <div class="clue me"><b class="mono">{copy.thisCase} · {caseNo}</b>{t.data.title}</div>
+        {related.map((r, i) => <a class={`clue n${i}`} href={u(`/tutorials/${slugOf(r.id)}/`, lang)}><b class="mono">{r.data.tags.filter((g: string) => t.data.tags.includes(g)).map((g: string) => '#' + g).join(' ')}</b>{r.data.title}</a>)}
       </div>
     </section>
   )}

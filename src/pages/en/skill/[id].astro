@@ -1,0 +1,8 @@
+---
+import Page from '../../skill/[id].astro';
+import { skillsFor } from '../../../skills';
+export function getStaticPaths() {
+  return skillsFor('en').map(s => ({ params: { id: s.id }, props: { id: s.id, lang: 'en' as const } }));
+}
+---
+<Page {...Astro.props} />

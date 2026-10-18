@@ -1,7 +1,11 @@
 ---
 import { u } from '../url';
 import Base from '../layouts/Base.astro';
-import { NODES, EDGES, GROUPS, GROUP_COLOR } from '../zhishi';
+import { graphFor, GROUP_COLOR } from '../zhishi';
+import { ui, langFromPath } from '../i18n';
+const lang = ((Astro.props.lang === 'en' || Astro.props.lang === 'zh') ? Astro.props.lang : langFromPath(Astro.url.pathname)) as 'zh' | 'en';
+const copy = ui[lang];
+const { NODES, EDGES, GROUPS } = graphFor(lang);
 
 /** 有序布局：按分组扇区 + 同心环，乱中有序 */
 const W = 1000, H = 720, CX = W / 2, CY = H / 2;
@@ -23,7 +27,7 @@ function spread(ids: typeof NODES, start: number, end: number, radius: number) {
     const t = n === 1 ? 0.5 : i / (n - 1);
     const deg = start + (end - start) * t;
     const { x, y } = polar(deg, radius);
-    return { ...node, x, y, color: GROUP_COLOR[node.group], r: node.kind === 'hub' ? 26 : node.kind === 'lesson' ? 10 : 6.5, href: node.href ? u(node.href) : undefined };
+    return { ...node, x, y, color: GROUP_COLOR[node.group], r: node.kind === 'hub' ? 26 : node.kind === 'lesson' ? 10 : 6.5, href: node.href ? u(node.href, lang) : undefined };
   });
 }
 
@@ -78,12 +82,12 @@ const placed = [
 
 const data = { nodes: placed, edges: EDGES, groups: GROUPS, W, H, CX, CY };
 ---
-<Base title="知识蛛网" description="侦办级 AI 知识网络：分组扇区、同心环布局，乱中有序。">
+<Base lang={lang} title={copy.zhishiTitle} description={copy.zhishiDesc}>
 <section class="zh page">
   <div class="wrap"><header class="zh-head page-head">
     <p class="eyebrow rise">Graph · {NODES.length} nodes · {EDGES.length} edges</p>
-    <h1 class="rise" style="animation-delay:.06s">知识网络</h1>
-    <p class="intro rise" style="animation-delay:.12s">像蜘蛛织网一样，把零散的 AI 知识点连成一张能用的网。节点按专案分组落在固定扇区——乱中有序；点选一条线索，邻域即亮。</p>
+    <h1 class="rise" style="animation-delay:.06s">{copy.zhishiH1}</h1>
+    <p class="intro rise" style="animation-delay:.12s">{copy.zhishiIntro}</p>
   </header></div>
 
 <div class="zh-stage wrap rise" style="animation-delay:.18s">
@@ -96,27 +100,24 @@ const data = { nodes: placed, edges: EDGES, groups: GROUPS, W, H, CX, CY };
         <button type="button" class="hud-btn" id="reset" hidden>RESET</button>
         <img class="hud-ip" src={u("/ip/avatar-64.png")} width="24" height="24" alt="" decoding="async"/>
       </div>
-      <canvas id="g" width={W} height={H} aria-label="AI 知识网络图"></canvas>
+      <canvas id="g" width={W} height={H} aria-label={copy.zhishiCanvas}></canvas>
       <div class="tip" id="tip" hidden></div>
     </div>
 
     <aside class="dossier">
       <h2 class="eyebrow">Brief</h2>
-      <p>中心 <b>AI</b>。内环为白话课专案（C-01–C-10），按「基本功 → 生成与检索 → 自主办事 → 远景」顺时针展开。外环为延伸概念，落在相关专案外侧。</p>
+      <p>{copy.zhishiBrief}</p>
       <h2 class="eyebrow">Legend</h2>
       <ul class="legend">
         {GROUPS.map(g => (
-          <li><i style={`background:${g.color}`}></i><span><b class="mono">{g.id}</b>{g.tip}</span></li>
+          <li><i style={`background:${g.color}`}></i><span><b class="mono">{g.label}</b>{g.tip}</span></li>
         ))}
       </ul>
       <h2 class="eyebrow">Ops</h2>
       <ul class="ops">
-        <li>悬停：邻域高亮</li>
-        <li>单击：聚焦</li>
-        <li>再击：打开教程</li>
-        <li>空白 / RESET：全景</li>
+        {copy.zhishiOps.map(op => <li>{op}</li>)}
       </ul>
-      <a class="sd-btn" href={u('/tutorials/')}>阅读全部教程 <span class="arr">→</span></a>
+      <a class="sd-btn" href={u('/tutorials/', lang)}>{copy.zhishiRead} <span class="arr">→</span></a>
     </aside>
   </div>
 </section>
@@ -225,7 +226,7 @@ function setFocus(n) {
 
 function showTip(n, cx, cy) {
   tip.hidden = false;
-  tip.innerHTML = `<div class="t-id mono">${n.caseId} · ${n.group}</div><div class="t-title">${n.label}</div><div class="t-body">${n.blurb}</div><div class="t-act mono">${n.href ? 'CLICK · OPEN' : 'INTEL ONLY'}</div>`;
+  tip.innerHTML = `<div class="t-id mono">${n.caseId} · ${n.groupLabel}</div><div class="t-title">${n.label}</div><div class="t-body">${n.blurb}</div><div class="t-act mono">${n.href ? 'CLICK · OPEN' : 'INTEL ONLY'}</div>`;
   const br = panel.getBoundingClientRect();
   let x = cx - br.left + 12, y = cy - br.top + 12;
   tip.style.transform = `translate(${Math.min(x, br.width - 250)}px, ${Math.min(y, br.height - 110)}px)`;

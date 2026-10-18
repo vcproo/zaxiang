@@ -2,7 +2,7 @@
 (()=>{
 const NS='http://www.w3.org/2000/svg';
 const $defs=document.getElementById('fxdefs');
-const h=(tag,cls,parent,html)=>{const e=document.createElement(tag);if(cls)e.className=cls;if(html!=null)e.innerHTML=html;if(parent)parent.appendChild(e);return e;};
+const h=(tag,cls,parent,html)=>{const e=document.createElement(tag);if(cls)e.className=cls;if(html!=null){if(window.SD_EN&&typeof html==='string'&&window.SD_TR)html=window.SD_TR(html);e.innerHTML=html;}if(parent)parent.appendChild(e);return e;};
 const clamp=(x,a=0,b=1)=>x<a?a:x>b?b:x;
 const lerp=(a,b,x)=>a+(b-a)*x;
 const pr=(t,s,l)=>l<=0?(t>=s?1:0):clamp((t-s)/l);
@@ -64,7 +64,7 @@ function makeCtx(){
   };
 }
 function typeTimes(p,n){const T=[];let acc=0;for(let i=0;i<n;i++){acc+=p.iv*(1+p.jit/100*(rnd(i+3)*2-1));T.push(acc);}return T;}
-const TW_TEXT=[...'你只需要把想法说清楚。'];
+const TW_TEXT=[...(window.SD_EN?'Say the idea clearly.':'你只需要把想法说清楚。')];
 function rampTable(p){
   const N=400,w=p.width/100;
   const sp=u=>{const d=Math.abs(u-.5)/(w/2);const k=d<=.6?1:d>=1?0:1-sstep((d-.6)/.4);return 1-(1-p.slow)*k;};
@@ -172,7 +172,7 @@ const FX=[
  params:[R('dur','单字时长',200,1000,10,500,'ms'),R('gap','错峰间隔',10,200,5,55,'ms'),R('dist','位移',0,160,5,70,'px'),S('mode','方式',[['up','从下升起'],['down','从上落下'],['scale','由小放大'],['blur','模糊变清']],'up'),EZ('outCubic',['outCubic','outExpo','outBack','spring','linear'])],
  dur:p=>p.dur+7*p.gap,main:p=>({ease:ez(p.ease,p),len:p.dur}),
  build(cv,p){
-   const ease=ez(p.ease,p);const row=h('div','row',cv);const sp=[...'一个字一个字地来'].map(c=>h('span','ch',row,c));
+   const ease=ez(p.ease,p);const row=h('div','row',cv);const sp=[...(window.SD_EN?'One letter at a time':'一个字一个字地来')].map(c=>h('span','ch',row,c));
    return{update(t){sp.forEach((el,i)=>{
      const x=pr(t,i*p.gap,p.dur),e=ease(x);el.style.opacity=clamp(x*3).toFixed(3);
      let tf;
@@ -282,6 +282,7 @@ const FX=[
      <path class="d1" d="M300 332 C200 300,232 190,470 180 C690 172,762 240,702 312 C650 366,420 372,300 336 C250 318,268 280,330 262"/>
      <path class="d2" d="M862 472 C832 422,792 382,742 344 M742 344 L782 346 M742 344 L752 382"/>
      <circle class="tip" r="7" fill="#FFC53D"/>`;
+   if(window.SD_TR)svg.innerHTML=window.SD_TR(svg.innerHTML);
    const d1=svg.querySelector('.d1'),d2=svg.querySelector('.d2'),tip=svg.querySelector('.tip');
    [d1,d2].forEach(d=>{d.setAttribute('fill','none');d.setAttribute('stroke',C.orange);d.setAttribute('stroke-width',p.sw);d.setAttribute('stroke-linecap','round');d.setAttribute('stroke-linejoin','round');});
    const L1=d1.getTotalLength(),L2=d2.getTotalLength();
@@ -315,12 +316,12 @@ const FX=[
  build(cv,p){
    const ease=ez(p.ease,p);const c=h('canvas','fill',cv);c.width=1920;c.height=1080;c.style.width='960px';c.style.height='540px';const g=c.getContext('2d');
    const L=document.createElement('canvas');L.width=1920;L.height=1080;const lg=L.getContext('2d');
-   const word='更大的世界',FONT='900 150px "Noto Sans SC","PingFang SC","Hiragino Sans GB",sans-serif';
+   const word=window.SD_EN?'A wider world':'更大的世界',FONT='900 150px "Noto Sans SC","PingFang SC","Hiragino Sans GB",sans-serif';
    const O=findOrigin(word,FONT);
    return{update(t){
      const x=pr(t,0,p.dur),e=ease(x),s=Math.pow(p.max,e),bs=lerp(1.35,1,e);
      g.setTransform(2,0,0,2,0,0);g.globalAlpha=1;g.fillStyle=C.orange;g.fillRect(0,0,960,540);
-     g.save();g.translate(480,270);g.scale(bs,bs);g.fillStyle=C.dark;g.font='900 128px "Noto Sans SC","PingFang SC",sans-serif';g.textAlign='center';g.textBaseline='middle';g.fillText('第二幕',0,0);g.restore();
+     g.save();g.translate(480,270);g.scale(bs,bs);g.fillStyle=C.dark;g.font='900 128px "Noto Sans SC","PingFang SC",sans-serif';g.textAlign='center';g.textBaseline='middle';g.fillText(window.SD_EN?'Scene two':'第二幕',0,0);g.restore();
      const fade=1-clamp((x-.82)/.18);if(fade<=0)return;
      lg.setTransform(2,0,0,2,0,0);lg.globalCompositeOperation='source-over';lg.clearRect(0,0,960,540);lg.fillStyle=C.dark;lg.fillRect(0,0,960,540);
      lg.globalCompositeOperation='destination-out';lg.save();lg.translate(O.x,O.y);lg.scale(s,s);lg.translate(-O.x,-O.y);
@@ -407,7 +408,7 @@ const FX=[
  dur:p=>p.dur+2*p.gap,main:p=>({ease:ez(p.ease,p),len:p.dur}),
  build(cv,p){
    const ease=ez(p.ease,p);const row=h('div','row',cv);row.style.gap='56px';
-   const items=[['文',C.orange,C.dark],['图',C.blue,C.ink],['声',C.cream,C.dark]].map(([c,bg,fg])=>{const d=h('div','tile',row,c);d.style.background=bg;d.style.color=fg;return d;});
+   const items=[[window.SD_EN?'A':'文',C.orange,C.dark],[window.SD_EN?'B':'图',C.blue,C.ink],[window.SD_EN?'C':'声',C.cream,C.dark]].map(([c,bg,fg])=>{const d=h('div','tile',row,c);d.style.background=bg;d.style.color=fg;return d;});
    return{update(t){items.forEach((d,i)=>{const x=pr(t,i*p.gap,p.dur),e=ease(x);d.style.transform=`scale(${Math.max(0,e).toFixed(4)})`;d.style.opacity=clamp(x*5);});}};
  }},
 
@@ -453,7 +454,7 @@ const FX=[
    const place=(el,t)=>{const u=Rt.pos(pr(t,0,p.dur));el.style.transform=`translate(${(lerp(x0,x1,u)-35).toFixed(2)}px,${(235-Math.sin(u*Math.PI)*60).toFixed(2)}px)`;};
    return{update(t){
      place(ball,t);ghosts.forEach(([g,k])=>place(g,t-k*22));
-     const moving=t>=0&&t<=p.dur;rd.innerHTML=`播放速度 <b>${moving?Rt.sp(pr(t,0,p.dur)).toFixed(2)+'×':'—'}</b>`;
+     const moving=t>=0&&t<=p.dur;const speed=`播放速度 <b>${moving?Rt.sp(pr(t,0,p.dur)).toFixed(2)+'×':'—'}</b>`;rd.innerHTML=window.SD_TR?window.SD_TR(speed):speed;
    }};
  }},
 
@@ -482,7 +483,7 @@ const FX=[
  build(cv,p){
    const ease=ez(p.ease,p);h('div','fill paper',cv);
    const row=h('div','sr-row',cv);const cs=[];
-   ['你的','智能体'].forEach(g=>{const w=h('span','',row);[...g].forEach((c,ci)=>cs.push({el:h('span','',w,c),ci}));});
+   (window.SD_EN?['YOUR','AGENT']:['你的','智能体']).forEach(g=>{const w=h('span','',row);[...g].forEach((c,ci)=>cs.push({el:h('span','',w,c),ci}));});
    const Wt=row.offsetWidth,cx=480,tl=cx-Wt/2,tr=cx+Wt/2,BW=10;
    const bl=h('div','sr-bar',cv),br=h('div','sr-bar',cv);const t0=p.dur*.55;
    return{update(t){
@@ -541,7 +542,7 @@ const FX=[
  build(cv,p){
    const dark=p.bg==='dark';const bg=h('div','fill',cv);bg.style.background=dark?'#0B0C0F':'#F2F1EE';
    const row=h('div','wh-row',cv);row.style.color=dark?'#F3EFE6':'#17181B';
-   const ws=['按','你','定下的','标准','来','做'].map(w=>h('span','',row,w));
+   const ws=(window.SD_EN?['By','the','standard','you','set','here']:['按','你','定下的','标准','来','做']).map(w=>h('span','',row,w));
    return{update(t){ws.forEach((el,i)=>{const e=EASE.outCubic(pr(t,i*p.gap,p.fade));el.style.opacity=lerp(p.base/100,1,e).toFixed(3);});}};
  }},
 
@@ -619,7 +620,7 @@ const FX=[
  dur:p=>p.dur+3*p.stag+450,main:p=>({ease:ez(p.ease,p),len:p.dur}),
  build(cv,p){
    const ease=ez(p.ease,p);h('div','fill paper',cv);
-   const D=[['说','#EBDDFB','#7B3FD6','先告诉客户可以换个方式验证'],['问','#DCEBFA','#2F7FD1','问一下邮箱和订单号'],['查','#FCE6D6','#D9661E','调用订单查询工具'],['答','#DDF3E1','#2E9A4E','验证通过，继续处理']];
+   const D=window.SD_EN?[['Say','#EBDDFB','#7B3FD6','Tell them there is another way to verify'],['Ask','#DCEBFA','#2F7FD1','Ask for the email and the order number'],['Look','#FCE6D6','#D9661E','Call the order lookup'],['Done','#DDF3E1','#2E9A4E','Verified. Continue.']]:[['说','#EBDDFB','#7B3FD6','先告诉客户可以换个方式验证'],['问','#DCEBFA','#2F7FD1','问一下邮箱和订单号'],['查','#FCE6D6','#D9661E','调用订单查询工具'],['答','#DDF3E1','#2E9A4E','验证通过，继续处理']];
    const it=D.map(([g,bg,fg,tx],i)=>{const ic=h('div','se-ic',cv,g);ic.style.background=bg;ic.style.color=fg;const te=h('div','se-tx',cv);te.style.top=(150+i*72+6)+'px';return{ic,te,tx,s:[456,159+i*58],e:[170,150+i*72]};});
    return{update(t){it.forEach((o,i)=>{
      const e=ease(pr(t,i*p.stag,p.dur));o.ic.style.transform=`translate(${lerp(o.s[0],o.e[0],e).toFixed(2)}px,${lerp(o.s[1],o.e[1],e).toFixed(2)}px)`;
@@ -666,6 +667,7 @@ const FX=[
      <div style="position:absolute;left:380px;top:258px;font-size:15px;font-weight:700;color:#17181B">模型</div>
      <div class="ln" style="position:absolute;left:380px;top:286px;width:180px;margin:0"></div>
      <div class="pg-row" style="top:310px">GPT-4o</div>`;
+   if(window.SD_TR)pg.innerHTML=window.SD_TR(pg.innerHTML);
    [[-14,-14],[648,-14],[-14,388],[648,388]].forEach(([x,y])=>{h('div','mk',cam).style.transform=`translate(${x}px,${y}px)`;});
    return{update(t){
      const e=ease(pr(t,0,p.dur)),s=Math.pow(p.from,1-e),ax=lerp(495,320,e),ay=lerp(216,190,e);
@@ -728,6 +730,22 @@ const ICON={
 const SPEEDS=[[1,'1×'],[.5,'½×'],[.25,'¼×'],[.1,'0.1×']];
 const TERM={std:'通用叫法',en:'英文通用',own:'自拟叫法'};
 const TERM_OF={'00':'std','01':'std','02':'std','03':'en','04':'own','05':'std','06':'std','07':'std','08':'std','09':'en','10':'std','11':'en','12':'en','13':'std','14':'std','15':'std','16':'std','17':'std','18':'std','19':'std','20':'en','21':'en','22':'own','23':'std','24':'en','25':'std','26':'std','27':'own','28':'en','29':'std','30':'std','31':'std','32':'std','33':'own'};
+if(window.SD_EN&&window.SD_MOTION){
+  const M=window.SD_MOTION;
+  CATS.forEach(c=>{const e=M.cats[c.id];if(e)Object.assign(c,e);});
+  FX.forEach(f=>{
+    if(M.watch[f.no])f.watch=M.watch[f.no];
+    if(f.en)f.name=f.en;
+    if(M.src[f.no])f.src=M.src[f.no];
+    (f.params||[]).forEach(q=>{
+      if(M.labels[q.label])q.label=M.labels[q.label];
+      if(q.opts)q.opts.forEach(o=>{if(M.labels[o[1]])o[1]=M.labels[o[1]];});
+    });
+  });
+  Object.keys(M.ease).forEach(k=>{if(EASE_INFO[k])EASE_INFO[k][0]=M.ease[k];});
+  EASE_INFO.spring[1]='A physical spring. A bezier cannot write it.';
+  Object.assign(TERM,M.term);
+}
 const fmt=(q,v)=>{const dec=(String(q.step).split('.')[1]||'').length;return Number(v).toFixed(dec)+(q.unit||'');};
 const cards=[];
 
@@ -742,18 +760,19 @@ function makeCard(def,mount){
 
   const tr=h('div','transport',root);
   const btn=(icon,label)=>{const b=h('button','tb',tr,ICON[icon]);b.type='button';b.setAttribute('aria-label',label);b.title=label;return b;};
-  const bPlay=btn('pause','播放 / 暂停'),bAgain=btn('again','从头播'),bPrev=btn('prev','上一帧'),bNext=btn('next','下一帧');
-  const scrub=h('input','scrub',tr);scrub.type='range';scrub.min=0;scrub.max=1000;scrub.step=1;scrub.setAttribute('aria-label','时间轴');scrub.id='scrub'+def.no;
+  const bPlay=btn('pause',window.SD_EN?'Play / pause':'播放 / 暂停'),bAgain=btn('again',window.SD_EN?'From the start':'从头播'),bPrev=btn('prev',window.SD_EN?'Previous frame':'上一帧'),bNext=btn('next',window.SD_EN?'Next frame':'下一帧');
+  const scrub=h('input','scrub',tr);scrub.type='range';scrub.min=0;scrub.max=1000;scrub.step=1;scrub.setAttribute('aria-label',window.SD_EN?'Timeline':'时间轴');scrub.id='scrub'+def.no;
   const tc=h('span','tc',tr);
   const seg=h('div','seg',tr);const spBtns=SPEEDS.map(([v,l])=>{const b=h('button','',seg,l);b.type='button';b.onclick=()=>setSpeed(v);return[v,b];});
 
   const body=h('div','body',root);
   h('div','meta',body,`<span class="no">#${def.no}</span><h3>${def.name}</h3><span class="en">${def.en}</span><span class="term ${TERM_OF[def.no]}">${TERM[TERM_OF[def.no]]}</span>`);
-  h('p','watch',body,`<b>盯这里</b>${def.watch}`);
-  if(def.src)h('p','src',body,`出处：ElevenLabs Agents Architect 发布片 ${def.src}`);
+  h('p','watch',body,window.SD_EN?`<b>Watch</b>${def.watch}`:`<b>盯这里</b>${def.watch}`);
+  if(def.src)h('p','src',body,window.SD_EN?`Source: ElevenLabs Agents Architect, ${def.src}`:`出处：ElevenLabs Agents Architect 发布片 ${def.src}`);
   const tune=h('div','tune',body);const prms=h('div','prms',tune);
   let gCan,gCap;if(def.main){const gw=h('div','graph',tune);gCan=h('canvas','',gw);gCap=h('div','gcap',gw);}
-  const codeRow=h('div','code',body);const code=h('code','',codeRow);const bCopy=h('button','copy',codeRow,'复制调用码');bCopy.type='button';
+  const copyIdle=window.SD_EN?'Copy the call':'复制调用码';
+  const codeRow=h('div','code',body);const code=h('code','',codeRow);const bCopy=h('button','copy',codeRow,copyIdle);bCopy.type='button';
 
   def.params.forEach(q=>{
     const id=`p${def.no}-${q.key}`;const w=h('div','prm',prms);const lab=h('label','',w);lab.htmlFor=id;h('span','',lab,q.label);const out=h('output','',lab);
@@ -768,12 +787,14 @@ function makeCard(def,mount){
   });
 
   function codeStr(){
-    return `#${def.no} ${def.name}（${def.en}）｜`+def.params.map(q=>{
+    const sep=window.SD_EN?' | ':'｜';
+    const title=window.SD_EN?`#${def.no} ${def.en}`:`#${def.no} ${def.name}（${def.en}）`;
+    return title+sep+def.params.map(q=>{
       const v=p[q.key];
       if(q.type==='range')return `${q.label} ${fmt(q,v)}`;
-      if(q.type==='ease')return `曲线 ${EASE_INFO[v][0]}`;
+      if(q.type==='ease')return `${window.SD_EN?'Easing':'曲线'} ${EASE_INFO[v][0]}`;
       return `${q.label} ${q.opts.find(o=>o[0]===v)[1]}`;
-    }).join('｜');
+    }).join(sep);
   }
   function rebuild(keep){
     ctx.cleanup();cv.innerHTML='';
@@ -783,8 +804,9 @@ function makeCard(def,mount){
     code.textContent=codeStr();
     if(main){
       const k=p.ease;
-      const label=main.label||(k?EASE_INFO[k][0]:'');
-      const bez=main.bez||(k?(k==='outBack'&&p.back!=null?`回弹量 ${p.back}`:EASE_INFO[k][1]):'');
+      const tr=s=>window.SD_EN&&window.SD_TR?window.SD_TR(s):s;
+      const label=tr(main.label||(k?EASE_INFO[k][0]:''));
+      const bez=tr(main.bez||(k?(k==='outBack'&&p.back!=null?(window.SD_EN?`Overshoot ${p.back}`:`回弹量 ${p.back}`):EASE_INFO[k][1]):''));
       gCap.innerHTML=`${label}<span>${bez}</span>`;
       let lo=0,hi=1;for(let i=0;i<=120;i++){const y=main.ease(i/120);lo=Math.min(lo,y);hi=Math.max(hi,y);}
       main.range=[lo,hi];
@@ -807,7 +829,9 @@ function makeCard(def,mount){
     const local=def.ambient?st.t:st.t-PRE;fx.update(local);
     scrub.value=Math.round(st.t/st.total*1000);
     const F=Math.round(motion/FRAME),f=Math.floor(local/FRAME);
-    tc.textContent=def.ambient?`循环 · ${(local/1000).toFixed(2)}s / ${(motion/1000).toFixed(1)}s`:local<0?`预备 · 共 ${F} 帧`:local>motion?`落定 · 共 ${F} 帧`:`第 ${String(f).padStart(2,'0')} 帧 / ${F} · ${Math.round(local)}ms`;
+    tc.textContent=window.SD_EN
+      ?(def.ambient?`Loop · ${(local/1000).toFixed(2)}s / ${(motion/1000).toFixed(1)}s`:local<0?`Lead-in · ${F} frames`:local>motion?`Settle · ${F} frames`:`Frame ${String(f).padStart(2,'0')} / ${F} · ${Math.round(local)}ms`)
+      :(def.ambient?`循环 · ${(local/1000).toFixed(2)}s / ${(motion/1000).toFixed(1)}s`:local<0?`预备 · 共 ${F} 帧`:local>motion?`落定 · 共 ${F} 帧`:`第 ${String(f).padStart(2,'0')} 帧 / ${F} · ${Math.round(local)}ms`);
     if(main)drawGraph(local);
   }
   function setPlaying(v){st.playing=v;bPlay.innerHTML=v?ICON.pause:ICON.play;if(v&&st.t>=st.total)st.t=0;}
@@ -819,8 +843,8 @@ function makeCard(def,mount){
   scrub.addEventListener('input',()=>{setPlaying(false);st.t=scrub.value/1000*st.total;render();});
   bCopy.onclick=()=>{
     const s=codeStr();
-    const done=()=>{bCopy.textContent='已复制';setTimeout(()=>bCopy.textContent='复制调用码',1400);};
-    const fallback=()=>{const r=document.createRange();r.selectNodeContents(code);const sel=getSelection();sel.removeAllRanges();sel.addRange(r);bCopy.textContent='已选中，按 ⌘C';setTimeout(()=>bCopy.textContent='复制调用码',2400);};
+    const done=()=>{bCopy.textContent=window.SD_EN?'Copied':'已复制';setTimeout(()=>bCopy.textContent=copyIdle,1400);};
+    const fallback=()=>{const r=document.createRange();r.selectNodeContents(code);const sel=getSelection();sel.removeAllRanges();sel.addRange(r);bCopy.textContent=window.SD_EN?'Selected — press ⌘C':'已选中，按 ⌘C';setTimeout(()=>bCopy.textContent=copyIdle,2400);};
     try{navigator.clipboard.writeText(s).then(done,fallback);}catch(e){fallback();}
   };
   setSpeed(1);setPlaying(st.playing);rebuild(false);

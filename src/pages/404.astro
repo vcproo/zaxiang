@@ -1,15 +1,32 @@
 ---
 import { u } from '../url';
 import Base from '../layouts/Base.astro';
+import { ui, langFromPath } from '../i18n';
+const lang = langFromPath(Astro.url.pathname);
+const t = ui[lang];
 ---
-<Base title="线索断了">
+<Base lang={lang} title={t.lostTitle}>
 <section class="wrap lost">
   <p class="code" aria-hidden="true">4<svg class="face" viewBox="0 0 100 100"><circle cx="50" cy="50" r="47"/><g class="look"><path d="M24.5 54 H43.5 A11 8 0 1 1 24.5 54 Z"/><path d="M56.5 54 H75.5 A11 8 0 1 1 56.5 54 Z"/></g><g class="se"><circle cx="24" cy="37" r="2.6"/><circle cx="31" cy="40.5" r="2.6"/><circle cx="38" cy="44" r="2.6"/><circle cx="62" cy="44" r="2.6"/><circle cx="69" cy="40.5" r="2.6"/><circle cx="76" cy="37" r="2.6"/></g></svg>4</p>
   <p class="eyebrow live">Case 404</p>
-  <h1>这条线索断了</h1>
-  <p class="sub">你要找的页面不在档案里。也许它被移走了，也许从来没有存在过。</p>
-  <div class="cta"><a class="sd-btn" href={u("/tutorials/")}>回到教程档案 <span class="arr">→</span></a><a class="sd-btn ghost" href={u("/")}>回首页</a></div>
+  <h1 id="lost-h">{t.lostH1}</h1>
+  <p class="sub" id="lost-sub">{t.lostSub}</p>
+  <div class="cta"><a class="sd-btn" id="lost-tut" href={u("/tutorials/", lang)}>{t.lostTutorials} <span class="arr">→</span></a><a class="sd-btn ghost" id="lost-home" href={u("/", lang)}>{t.lostHome}</a></div>
 </section>
+<script is:inline>
+(function () {
+  var en = /\/en(\/|$)/.test(location.pathname);
+  if (!en || document.documentElement.lang === 'en') return;
+  document.documentElement.lang = 'en';
+  document.title = 'The lead goes cold · Spider Detective';
+  var h = document.getElementById('lost-h'); if (h) h.textContent = 'This lead goes cold';
+  var s = document.getElementById('lost-sub'); if (s) s.textContent = 'That page is not in the archive. It may have been moved, or it may never have been filed.';
+  var tut = document.getElementById('lost-tut');
+  var home = document.getElementById('lost-home');
+  if (tut) { tut.href = tut.href.replace(/\/tutorials\/$/, '/en/tutorials/'); tut.firstChild.textContent = 'Back to the tutorials '; }
+  if (home) { home.href = home.href.replace(/\/zaxiang\/$/, '/zaxiang/en/'); home.textContent = 'Home'; }
+})();
+</script>
 </Base>
 <style>
 .lost{display:grid;justify-items:center;text-align:center;gap:18px;padding-top:120px;padding-bottom:40px}

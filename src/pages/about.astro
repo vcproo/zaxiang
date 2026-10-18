@@ -1,37 +1,41 @@
 ---
 import Base from '../layouts/Base.astro';
 import IpFigure from '../components/IpFigure.astro';
-import { SITE } from '../site';
-const topics = ['提示词与上下文工程', 'AI Agent 与自动化工作流', '本地模型部署与开源工具', 'AI 产品拆解与实战案例'];
+import { siteFor } from '../site';
+import { ui, langFromPath } from '../i18n';
+const lang = ((Astro.props.lang === 'en' || Astro.props.lang === 'zh') ? Astro.props.lang : langFromPath(Astro.url.pathname)) as 'zh' | 'en';
+const t = ui[lang];
+const SITE = siteFor(lang);
+const topics = t.aboutTopics;
 ---
-<Base title="关于">
+<Base lang={lang} title={t.aboutTitle}>
 <section class="wrap page about">
   <div class="grid">
     <div class="portrait rise">
-      <IpFigure variant="about" src="/ip/character-front.webp" alt="蜘蛛侦探标准立绘" width={420} height={497} caption="标准立绘 · 观察态" />
+      <IpFigure variant="about" src="/ip/character-front.webp" alt={t.aboutAlt} width={420} height={497} caption={t.aboutCap} />
       <dl class="profile mono">
-        <div><dt>代号</dt><dd>蜘蛛侦探 · Spider Detective</dd></div>
-        <div><dt>性格</dt><dd>严肃 · 克制 · 好奇 · 可靠</dd></div>
-        <div><dt>特长</dt><dd>总能察觉被别人忽略的小线索</dd></div>
+        <div><dt>{t.aboutCode}</dt><dd>{t.aboutCodeV}</dd></div>
+        <div><dt>{t.aboutPersona}</dt><dd>{t.aboutPersonaV}</dd></div>
+        <div><dt>{t.aboutSkill}</dt><dd>{t.aboutSkillV}</dd></div>
       </dl>
     </div>
     <div class="text">
       <header class="page-head">
-        <p class="eyebrow rise">About / 关于</p>
-        <h1 class="rise" style="animation-delay:.06s">关于蜘蛛侦探</h1>
+        <p class="eyebrow rise">{t.aboutEyebrow}</p>
+        <h1 class="rise" style="animation-delay:.06s">{t.aboutH1}</h1>
       </header>
       <div class="body rise" style="animation-delay:.12s">
-        <p class="lead">你好，我是「蜘蛛侦探」。像蜘蛛织网一样，我把零散的 AI 知识点连成一张能用的网；像侦探查案一样，我对每个新工具都先问一句：<span class="hl">它到底是怎么做到的？</span></p>
-        <p>这个网站是我的 AI 教程档案馆。每篇教程都会写清楚适用场景、准备工作和完整步骤，尽量让你读完就能动手。</p>
+        <p class="lead">{t.aboutLeadBefore}<span class="hl">{t.aboutLeadEm}</span></p>
+        <p>{t.aboutBody}</p>
       </div>
       <section class="sec reveal">
-        <h2>这里会写什么</h2>
+        <h2>{t.aboutWrite}</h2>
         <ul class="topics">{topics.map((t, i) => <li class="sd-card"><span class="mono">{String(i + 1).padStart(2, '0')}</span>{t}</li>)}</ul>
       </section>
       <section class="sec reveal">
-        <h2>找到我</h2>
+        <h2>{t.aboutFind}</h2>
         <p class="social">{SITE.socials.map(s => <a class="sd-chip" href={s.url}>{s.name}</a>)}</p>
-        <p class="mail">合作与投稿：<span class="mono">hello@example.com</span></p>
+        <p class="mail">{t.aboutMail}<span class="mono">hello@example.com</span></p>
       </section>
     </div>
   </div>

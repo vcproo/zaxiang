@@ -1,55 +1,127 @@
 ---
 import { u } from '../url';
 import '../styles/global.css';
-import { SITE } from '../site';
+import { siteFor } from '../site';
+import { ui, langFromPath, barePath, switchPath, type Lang } from '../i18n';
+const lang = (Astro.props.lang as Lang | undefined) ?? langFromPath(Astro.url.pathname);
+const t = ui[lang];
+const SITE = siteFor(lang);
 const { title, description = SITE.tagline } = Astro.props;
-const path = Astro.url.pathname.replace(import.meta.env.BASE_URL.replace(/\/$/, ''), '') || '/';
-const nav = [['/tutorials/', '教程'], ['/motion/', '动效'], ['/tools/', '工具'], ['/skill/', 'Skill'], ['/tips/', '小技巧'], ['/about/', '关于']];
-const [tagA, tagB] = SITE.tagline.replace(/。$/, '').split('，');
-// 六颗副眼：与 IP 一致，左右各三颗，内侧略低
+const path = barePath(Astro.url.pathname);
+const nav = t.nav;
 const eyes = [[4, 4], [10, 6.5], [16, 9], [30, 9], [36, 6.5], [42, 4]];
+const zhHref = switchPath(Astro.url.pathname, 'zh');
+const enHref = switchPath(Astro.url.pathname, 'en');
+const abs = (p: string) => Astro.site ? new URL(p, Astro.site).href : p;
 ---
-<html lang="zh-CN"><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>{title ? `${title} · ${SITE.name}` : `${SITE.name} · AI 教程与笔记`}</title>
+<html lang={t.htmlLang}><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+<script is:inline define:vars={{ siteBase: import.meta.env.BASE_URL }}>
+(function () {
+  var base = String(siteBase || '/').replace(/\/$/, '');
+  var CHOICE = 'sd-lang';
+  var GEO = 'sd-geo';
+  var ZH = { CN: 1, HK: 1, MO: 1, TW: 1 };
+  function bare(path) {
+    if (path.indexOf(base) === 0) path = path.slice(base.length) || '/';
+    if (!path || path.charAt(0) !== '/') path = '/' + (path || '');
+    return path;
+  }
+  function current() {
+    var path = bare(location.pathname);
+    return path === '/en' || path.indexOf('/en/') === 0 ? 'en' : 'zh';
+  }
+  function dest(want) {
+    if (want !== 'zh' && want !== 'en') return '';
+    if (current() === want) return '';
+    var path = bare(location.pathname);
+    if (path === '/en' || path === '/en/') path = '/';
+    else if (path.indexOf('/en/') === 0) path = path.slice(3) || '/';
+    if (path.length > 1 && path.charAt(path.length - 1) !== '/') path += '/';
+    var next = want === 'zh' ? base + (path === '/' ? '/' : path) : base + (path === '/' ? '/en/' : '/en' + path);
+    return next + location.search + location.hash;
+  }
+  function go(want) {
+    var href = dest(want);
+    if (href) location.replace(href);
+  }
+  function remember(key, value) {
+    try { (key === CHOICE ? localStorage : sessionStorage).setItem(key, value); } catch (e) {}
+  }
+  function read(key) {
+    try { return (key === CHOICE ? localStorage : sessionStorage).getItem(key) || ''; } catch (e) { return ''; }
+  }
+  var choice = read(CHOICE);
+  if (choice === 'zh' || choice === 'en') { go(choice); return; }
+  var cached = read(GEO);
+  if (cached === 'zh' || cached === 'en') { go(cached); return; }
+  var ctrl = typeof AbortController === 'function' ? new AbortController() : null;
+  var timer = setTimeout(function () { if (ctrl) ctrl.abort(); }, 4000);
+  var opt = { credentials: 'omit' };
+  if (ctrl) opt.signal = ctrl.signal;
+  fetch('https://get.geojs.io/v1/ip/country.json', opt)
+    .then(function (r) { return r.ok ? r.json() : Promise.reject(); })
+    .then(function (data) { return String((data && data.country) || '').toUpperCase(); })
+    .catch(function () {
+      return fetch('https://ipapi.co/country_code/', opt).then(function (r) { return r.ok ? r.text() : ''; });
+    })
+    .then(function (code) {
+      clearTimeout(timer);
+      code = String(code || '').trim().toUpperCase();
+      if (!/^[A-Z]{2}$/.test(code)) return;
+      var want = ZH[code] ? 'zh' : 'en';
+      remember(GEO, want);
+      go(want);
+    })
+    .catch(function () { clearTimeout(timer); });
+})();
+</script>
+<title>{title ? `${title} · ${SITE.name}` : `${SITE.name} · ${t.docTitle}`}</title>
 <meta name="description" content={description}/><meta name="theme-color" content="#141218"/>
+<link rel="alternate" hreflang="zh-CN" href={abs(zhHref)}/>
+<link rel="alternate" hreflang="en" href={abs(enHref)}/>
+<link rel="alternate" hreflang="x-default" href={abs(zhHref)}/>
 <link rel="icon" href={u("/favicon.svg")} type="image/svg+xml"/>
 <link rel="icon" href={u("/favicon-32.png")} type="image/png" sizes="32x32"/>
 <link rel="apple-touch-icon" href={u("/ip/avatar-256.png")}/></head>
-<body>
+<body data-egg={t.egg} data-console={t.console}>
 <header class="hdr">
   <div class="wrap hdr-in">
-    <a href={u("/")} class="brand" title="回到首页" aria-label="蜘蛛侦探，回到首页">
+    <a href={u("/", lang)} class="brand" title={t.backHome} aria-label={t.brandHome}>
       <span class="brand-ava"><img src={u("/ip/avatar-64.png")} width="34" height="34" alt=""/></span>
-      <span class="brand-txt"><b>蜘蛛侦探</b><small class="mono">SPIDER DETECTIVE</small></span>
+      <span class="brand-txt"><b>{SITE.name}</b><small class="mono">SPIDER DETECTIVE</small></span>
     </a>
-    <nav class="nav" aria-label="主导航">
-      {nav.map(([h, l]) => <a href={u(h)} class={path.startsWith(h) ? 'cur' : ''} aria-current={path.startsWith(h) ? 'page' : undefined}>{l}</a>)}
+    <nav class="nav" aria-label={t.navLabel}>
+      {nav.map(([h, l]) => <a href={u(h, lang)} class={path.startsWith(h) ? 'cur' : ''} aria-current={path.startsWith(h) ? 'page' : undefined}>{l}</a>)}
     </nav>
-    <button type="button" class="sense" aria-label="阅读进度" title="阅读进度">
+    <nav class="lang" aria-label="Language">
+      <a href={zhHref} hreflang="zh-CN" lang="zh-CN" data-lang-link class={lang === 'zh' ? 'on' : ''}>中文</a>
+      <a href={enHref} hreflang="en" lang="en" data-lang-link class={lang === 'en' ? 'on' : ''}>EN</a>
+    </nav>
+    <button type="button" class="sense" aria-label={t.progress} title={t.progress}>
       <svg viewBox="0 0 46 13" width="46" height="13" aria-hidden="true">{eyes.map(([x, y]) => <circle cx={x} cy={y} r="2.3"/>)}</svg>
     </button>
-    <button type="button" class="menu-btn" aria-expanded="false" aria-controls="mnav"><span></span><span></span><b class="sr">菜单</b></button>
+    <button type="button" class="menu-btn" aria-expanded="false" aria-controls="mnav"><span></span><span></span><b class="sr">{t.menu}</b></button>
   </div>
   <div class="hdr-prog" aria-hidden="true"><i></i></div>
 </header>
 <div class="mnav" id="mnav" hidden>
-  <nav class="wrap" aria-label="移动端导航">
-    <a href={u("/")} class={path === '/' ? 'cur' : ''}><span class="mono">00</span>首页</a>
-    {nav.map(([h, l], i) => <a href={u(h)} class={path.startsWith(h) ? 'cur' : ''}><span class="mono">{String(i + 1).padStart(2, '0')}</span>{l}</a>)}
+  <nav class="wrap" aria-label={t.mobileNav}>
+    <a href={u("/", lang)} class={path === '/' ? 'cur' : ''}><span class="mono">00</span>{t.homeMobile}</a>
+    {nav.map(([h, l], i) => <a href={u(h, lang)} class={path.startsWith(h) ? 'cur' : ''}><span class="mono">{String(i + 1).padStart(2, '0')}</span>{l}</a>)}
   </nav>
 </div>
 <main><slot/></main>
 <footer class="ftr">
   <div class="wrap">
     <div class="ftr-top">
-      <p class="ftr-line">{tagA}，<br/><span class="hl">{tagB}。</span></p>
+      <p class="ftr-line">{t.tagA}<br/><span class="hl">{t.tagB}</span></p>
       <div class="ftr-cols">
-        <div><p class="eyebrow">站内</p>{nav.map(([h, l]) => <a href={u(h)}>{l}</a>)}</div>
-        <div><p class="eyebrow">找到我</p>{SITE.socials.map(s => <a href={s.url}>{s.name}</a>)}</div>
+        <div><p class="eyebrow">{t.footerOnSite}</p>{nav.map(([h, l]) => <a href={u(h, lang)}>{l}</a>)}</div>
+        <div><p class="eyebrow">{t.footerFind}</p>{SITE.socials.map(s => <a href={s.url}>{s.name}</a>)}</div>
       </div>
     </div>
     <div class="ftr-bot mono">
-      <a href={u("/")} class="ftr-brand"><img src={u("/ip/avatar-64.png")} width="22" height="22" alt=""/>© {new Date().getFullYear()} 蜘蛛侦探 · Spider Detective</a>
+      <a href={u("/", lang)} class="ftr-brand"><img src={u("/ip/avatar-64.png")} width="22" height="22" alt=""/>© {new Date().getFullYear()} {t.footerCopy}</a>
       <span>END OF FILE ■</span>
     </div>
   </div>
@@ -103,7 +175,7 @@ addEventListener('pointermove', e => {
 // 彩蛋：敲 spider，或连点副眼 5 次
 function toast(t: string) { const d = document.createElement('div'); d.className = 'toast'; d.textContent = t; document.body.append(d); setTimeout(() => d.remove(), 3400); }
 function egg() {
-  toast('🔍 你发现了一条隐藏线索：真相只有一个——多读几篇教程。');
+  toast(document.body.dataset.egg || '');
   if (reduce) return;
   const s = document.createElement('div'); s.className = 'scan'; document.body.append(s); setTimeout(() => s.remove(), 1700);
   dots.forEach((d, i) => { d.classList.remove('flash'); setTimeout(() => d.classList.add('flash'), i * 70); setTimeout(() => d.classList.remove('flash'), 900 + i * 70); });
@@ -112,7 +184,16 @@ let buf = '';
 addEventListener('keydown', e => { if ((e.target as HTMLElement).matches('input,textarea')) return; buf = (buf + e.key.toLowerCase()).slice(-6); if (buf === 'spider') egg(); });
 let clicks = 0, t0 = 0;
 document.querySelector('.sense')!.addEventListener('click', () => { const n = Date.now(); clicks = n - t0 < 600 ? clicks + 1 : 1; t0 = n; if (clicks >= 5) { clicks = 0; egg(); } });
-console.log('%c🔍 蜘蛛侦探在此。线索：在页面上敲下 spider。', 'font-size:14px;background:#C7EFDC;color:#27232D;padding:4px 8px;border-radius:4px');
+console.log('%c' + (document.body.dataset.console || ''), 'font-size:14px;background:#C7EFDC;color:#27232D;padding:4px 8px;border-radius:4px');
+document.querySelectorAll<HTMLAnchorElement>('[data-lang-link]').forEach(a => {
+  const url = new URL(a.href, location.origin);
+  url.search = location.search;
+  url.hash = location.hash;
+  a.href = url.pathname + url.search + url.hash;
+  a.addEventListener('click', () => {
+    try { localStorage.setItem('sd-lang', a.hreflang === 'en' ? 'en' : 'zh'); } catch { /* 隐私模式忽略 */ }
+  });
+});
 </script>
 <style>
 .hdr{position:sticky;top:0;z-index:40;transition:background .3s,border-color .3s;border-bottom:1px solid transparent}
@@ -131,6 +212,11 @@ console.log('%c🔍 蜘蛛侦探在此。线索：在页面上敲下 spider。',
 .nav a:hover{color:var(--fg);background:rgba(243,235,221,.06)}
 .nav a.cur{color:var(--mint)}
 .nav a.cur::after{content:"";position:absolute;left:50%;bottom:1px;width:4px;height:4px;margin-left:-2px;border-radius:50%;background:var(--mint)}
+.lang{display:flex;align-items:center;gap:1px;padding:3px;border:1px solid var(--line-2);border-radius:999px;flex:none}
+.lang a{padding:4px 8px;border-radius:999px;text-decoration:none;font:500 11px var(--mono);letter-spacing:.06em;color:var(--fg-3)}
+.lang a.on{background:var(--mint);color:var(--ink)}
+.lang a:hover{color:var(--fg)}
+.lang a.on:hover{color:var(--ink)}
 .sense{display:grid;place-items:center;width:62px;height:34px;border-radius:999px;border:1px solid var(--line-2);background:transparent;cursor:pointer;padding:0;transition:border-color .2s}
 .sense:hover{border-color:var(--mint)}
 .sense circle{fill:rgba(243,235,221,.18);transition:fill .35s,filter .35s}
@@ -167,6 +253,6 @@ console.log('%c🔍 蜘蛛侦探在此。线索：在页面上敲下 spider。',
 .ftr-brand img{border-radius:50%;background:var(--cream)}
 
 @media(max-width:1060px){.nav a{padding:8px 10px;font-size:14px}.hdr-in{gap:16px}}
-@media(max-width:960px){.nav{display:none}.menu-btn{display:block}.sense{width:56px}}
+@media(max-width:960px){.nav{display:none}.menu-btn{display:block}.sense{width:56px}.lang a{padding:4px 7px}}
 @media(max-width:720px){.ftr{margin-top:96px}.ftr-top{grid-template-columns:1fr;padding:56px 0 40px}.brand-txt small{display:none}}
 </style></body></html>

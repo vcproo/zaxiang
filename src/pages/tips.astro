@@ -1,14 +1,18 @@
 ---
 import { u } from '../url';
 import Base from '../layouts/Base.astro';
-import { tips } from '../tips';
+import { tipsFor } from '../tips';
+import { ui, langFromPath } from '../i18n';
+const lang = ((Astro.props.lang === 'en' || Astro.props.lang === 'zh') ? Astro.props.lang : langFromPath(Astro.url.pathname)) as 'zh' | 'en';
+const copy = ui[lang];
+const tips = tipsFor(lang);
 ---
-<Base title="小技巧" description="一句话就能用上的 AI 小技巧，点开抽屉看详情与对比效果。">
+<Base lang={lang} title={copy.tipsTitle} description={copy.tipsDesc}>
   <section class="wrap page tips-page">
     <header class="page-head">
-      <p class="eyebrow rise">Field notes / 小技巧</p>
-      <h1 class="rise" style="animation-delay:.06s">一句话的小技巧，<br/>立刻能用。</h1>
-      <p class="intro rise" style="animation-delay:.12s">点开每一条，看具体用法；带对比效果的，可以切到「对比效果」看前后差别。</p>
+      <p class="eyebrow rise">{copy.tipsEyebrow}</p>
+      <h1 class="rise" style="animation-delay:.06s">{copy.tipsH1a}<br/>{copy.tipsH1b}</h1>
+      <p class="intro rise" style="animation-delay:.12s">{copy.tipsIntro}</p>
     </header>
     <div class="list">
     {tips.map((t, i) => (
@@ -23,16 +27,16 @@ import { tips } from '../tips';
         </button>
         <div class="drawer" id={`tip-drawer-${i}`}><div class="drawer-in"><div class="drawer-body">
           {t.compare && (
-            <div class="seg" role="tablist" aria-label="内容切换">
-              <button type="button" class="seg-btn on" role="tab" aria-selected="true" data-pane="note">技巧</button>
-              <button type="button" class="seg-btn" role="tab" aria-selected="false" data-pane="cmp">对比效果</button>
+            <div class="seg" role="tablist" aria-label={copy.tipsPane}>
+              <button type="button" class="seg-btn on" role="tab" aria-selected="true" data-pane="note">{copy.tipsNoteTab}</button>
+              <button type="button" class="seg-btn" role="tab" aria-selected="false" data-pane="cmp">{copy.tipsCmpTab}</button>
             </div>
           )}
           <div class="pane pane-note on" data-pane="note" role="tabpanel">
             <ol>{t.points.map(p => <li>{p}</li>)}</ol>
             {t.prompt && (
               <div class="prompt">
-                <span class="mono">提示词可以这样写</span>
+                <span class="mono">{copy.tipsPrompt}</span>
                 <code class="mono">{t.prompt}</code>
               </div>
             )}
@@ -56,7 +60,7 @@ import { tips } from '../tips';
       </article>
     ))}
     </div>
-    <p class="sd-note">遇到新的小招会随时补进来。</p>
+    <p class="sd-note">{copy.tipsNote}</p>
   </section>
 </Base>
 <style>

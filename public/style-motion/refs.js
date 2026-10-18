@@ -7,18 +7,21 @@
   var base = panel.getAttribute('data-refs');
   if (!base) return;
   var reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var EN = !!window.SD_EN;
 
   var sec = document.createElement('section');
   sec.className = 'cat';
   sec.id = 'refs';
-  sec.innerHTML = '<h2>成片参考<span id="refs-count"></span></h2>'
-    + '<p>公开成片的短预览，用来对照节奏、构图和转场。进入画面后自己循环播放，最多同时两条；鼠标移到某一张上会改播那一张。这组不跟上面的「全部暂停」走。</p>'
-    + '<div class="ref-tools"><input id="refs-q" type="search" placeholder="搜索标题、作者、提示词、原帖" aria-label="搜索成片参考"><span id="refs-shown"></span></div>'
+  sec.innerHTML = '<h2>' + (EN ? 'Finished films' : '成片参考') + '<span id="refs-count"></span></h2>'
+    + '<p>' + (EN
+      ? 'Short previews of public films, for pace, framing, and cuts. They loop once they enter the screen, two at a time. Hover one to play that one. This group does not follow Pause all above.'
+      : '公开成片的短预览，用来对照节奏、构图和转场。进入画面后自己循环播放，最多同时两条；鼠标移到某一张上会改播那一张。这组不跟上面的「全部暂停」走。') + '</p>'
+    + '<div class="ref-tools"><input id="refs-q" type="search" placeholder="' + (EN ? 'Search title, author, prompt, post' : '搜索标题、作者、提示词、原帖') + '" aria-label="' + (EN ? 'Search finished films' : '搜索成片参考') + '"><span id="refs-shown"></span></div>'
     + '<div class="ref-grid" id="refs-grid"></div>';
   root.appendChild(sec);
   var link = document.createElement('a');
   link.href = '#refs';
-  link.innerHTML = '成片参考<span id="refs-nav">…</span>';
+  link.innerHTML = (EN ? 'Finished films' : '成片参考') + '<span id="refs-nav">…</span>';
   nav.appendChild(link);
 
   function esc(s) {
@@ -121,25 +124,44 @@
     };
   }
 
+  function extra(item) {
+    var map = window.SD_REFS_EN;
+    return EN && map ? map[item.slug] || null : null;
+  }
+  function viewTitle(item) {
+    var row = extra(item);
+    return (row && row.title) || item.title;
+  }
+  function viewBy(item) {
+    var by = item.by || '';
+    return EN ? by.replace(/^原作者/, 'By') : by;
+  }
+  function viewPrompt(item) {
+    var row = extra(item);
+    var prompt = (row && row.prompt) || item.prompt || '';
+    return EN ? prompt.replace(/【作者补充制作说明】/g, "[Author's note]") : prompt;
+  }
   function render() {
     if (preview) preview.clear();
     var query = q.value.trim().toLowerCase();
     var shown = items.filter(function (item) {
       if (!query) return true;
-      return (item.title + '\n' + item.by + '\n' + item.prompt + '\n' + item.post).toLowerCase().indexOf(query) >= 0;
+      return (viewTitle(item) + '\n' + item.title + '\n' + viewBy(item) + '\n' + item.by + '\n' + viewPrompt(item) + '\n' + item.prompt + '\n' + item.post).toLowerCase().indexOf(query) >= 0;
     });
     sec.querySelector('#refs-shown').textContent = shown.length + ' / ' + items.length;
-    if (!shown.length) { grid.innerHTML = '<p class="ref-empty">没有匹配的成片</p>'; return; }
+    if (!shown.length) { grid.innerHTML = '<p class="ref-empty">' + (EN ? 'No films match' : '没有匹配的成片') + '</p>'; return; }
     grid.innerHTML = shown.map(function (item) {
+      var title = viewTitle(item);
       var aspect = item.aspect ? '<span class="pill">' + esc(item.aspect) + '</span>' : '';
       var post = item.post ? '<a class="post" href="' + esc(item.post) + '" target="_blank" rel="noopener">' + esc(item.post) + '</a>' : '';
-      var prompt = item.prompt ? '<details><summary>提示词</summary><pre>' + esc(item.prompt) + '</pre></details>' : '';
+      var promptText = viewPrompt(item);
+      var prompt = promptText ? '<details><summary>' + (EN ? 'Prompt' : '提示词') + '</summary><pre>' + esc(promptText) + '</pre></details>' : '';
       return '<article class="ref"><div class="shot">'
         + '<img src="' + esc(media(item.slug, 'posters')) + '" alt="" loading="lazy" onerror="this.remove()">'
         + '<video data-src="' + esc(media(item.slug, 'previews')) + '" muted loop playsinline preload="none"></video>'
         + '<div class="pills">' + aspect + '</div><span class="clock pill">00:00</span><div class="barline"><i></i></div>'
-        + '<button class="play" type="button" aria-label="播放 ' + esc(item.title) + '"><svg viewBox="0 0 16 16" fill="currentColor"><path d="M5 3.2v9.6L13 8z"/></svg></button>'
-        + '</div><h3>' + esc(item.title) + '</h3><p class="by">' + esc(item.by) + '</p>' + post + prompt + '</article>';
+        + '<button class="play" type="button" aria-label="' + (EN ? 'Play ' : '播放 ') + esc(title) + '"><svg viewBox="0 0 16 16" fill="currentColor"><path d="M5 3.2v9.6L13 8z"/></svg></button>'
+        + '</div><h3>' + esc(title) + '</h3><p class="by">' + esc(viewBy(item)) + '</p>' + post + prompt + '</article>';
     }).join('');
     preview = createPreview();
     grid.querySelectorAll('.ref').forEach(function (card) { preview.observe(card); });
@@ -155,7 +177,7 @@
       if (location.hash === '#refs') sec.scrollIntoView();
     })
     .catch(function () {
-      grid.innerHTML = '<p class="ref-empty">成片列表没有加载出来</p>';
+      grid.innerHTML = '<p class="ref-empty">' + (EN ? 'The film list did not load' : '成片列表没有加载出来') + '</p>';
     });
   q.addEventListener('input', function () { if (items.length) render(); });
 })();

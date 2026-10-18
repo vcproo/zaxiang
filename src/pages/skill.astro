@@ -1,29 +1,33 @@
 ---
 import { u } from '../url';
 import Base from '../layouts/Base.astro';
-import { skills } from '../skills';
+import { skillsFor } from '../skills';
+import { ui, langFromPath } from '../i18n';
+const lang = ((Astro.props.lang === 'en' || Astro.props.lang === 'zh') ? Astro.props.lang : langFromPath(Astro.url.pathname)) as 'zh' | 'en';
+const t = ui[lang];
+const skills = skillsFor(lang);
 ---
-<Base title="Skill 档案" description="收录我用过的 Agent Skill：每个都有地址、用法和实际生成的演示效果。">
+<Base lang={lang} title={t.skillTitle} description={t.skillDesc}>
   <section class="wrap page">
     <header class="page-head">
-      <p class="eyebrow rise">Skill archive / Skill 档案</p>
-      <h1 class="rise" style="animation-delay:.06s">把做法写成手册，<br/>用时一句话调出。</h1>
-      <p class="intro rise" style="animation-delay:.12s">收录我用过的 Agent Skill。每个都记录三样东西：仓库地址、用法、以及它实际生成的演示效果。点开看详情。</p>
+      <p class="eyebrow rise">{t.skillEyebrow}</p>
+      <h1 class="rise" style="animation-delay:.06s">{t.skillH1a}<br/>{t.skillH1b}</h1>
+      <p class="intro rise" style="animation-delay:.12s">{t.skillIntro}</p>
     </header>
     <div class="list">
       {skills.map((s, i) => (
-        <a class="skill sd-card spot reveal" href={u(`/skill/${s.id}/`)} aria-label={`${s.name}（查看详情）`}>
-          <span class="thumb"><img src={u(s.thumb)} alt={`${s.name} 演示截图`} loading="lazy"/></span>
+        <a class="skill sd-card spot reveal" href={u(`/skill/${s.id}/`, lang)} aria-label={`${s.name} (${t.skillView})`}>
+          <span class="thumb"><img src={u(s.thumb)} alt={`${s.name} ${t.skillShot}`} loading="lazy"/></span>
           <span class="info">
             <span class="catline mono"><span class="no">{String(i + 1).padStart(2, '0')}</span><span class="cat">{s.category}</span><span class="host">{s.repo.replace(/^https:\/\/github\.com\//, '').replace(/\/tree\/.*$/, '')}</span></span>
             <strong>{s.name}</strong>
             <span class="desc">{s.tagline}</span>
-            <span class="foot"><span class="mono">演示：{s.demo.title} · 可交互</span><span class="go">查看档案 <span>→</span></span></span>
+            <span class="foot"><span class="mono">{t.skillDemo}: {s.demo.title} · {t.skillInteractive}</span><span class="go">{t.skillOpen} <span>→</span></span></span>
           </span>
         </a>
       ))}
     </div>
-    <p class="sd-note">共 {skills.length} 个 Skill，遇到好用的会持续收录。</p>
+    <p class="sd-note">{skills.length} · {t.skillNote}</p>
   </section>
 </Base>
 <style>

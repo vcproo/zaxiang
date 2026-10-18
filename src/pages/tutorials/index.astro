@@ -2,26 +2,29 @@
 import Base from '../../layouts/Base.astro';
 import Card from '../../components/Card.astro';
 import { allTutorials } from '../../lib';
-const all = await allTutorials();
+import { ui, langFromPath } from '../../i18n';
+const lang = ((Astro.props.lang === 'en' || Astro.props.lang === 'zh') ? Astro.props.lang : langFromPath(Astro.url.pathname)) as 'zh' | 'en';
+const copy = ui[lang];
+const all = await allTutorials(lang);
 const tags = [...new Set(all.flatMap(t => t.data.tags))];
 ---
-<Base title="全部教程">
+<Base lang={lang} title={copy.tutTitle}>
 <section class="wrap page">
   <header class="page-head">
-    <p class="eyebrow rise">Archive / 教程档案</p>
-    <h1 class="rise" style="animation-delay:.06s">全部教程</h1>
-    <p class="intro rise" style="animation-delay:.12s">共 <span class="mono hl" id="count">{all.length}</span> 篇。按标签筛选，或直接搜索标题与内容摘要。</p>
+    <p class="eyebrow rise">{copy.tutEyebrow}</p>
+    <h1 class="rise" style="animation-delay:.06s">{copy.tutH1}</h1>
+    <p class="intro rise" style="animation-delay:.12s"><span class="mono hl" id="count">{all.length}</span>{copy.tutIntro}</p>
   </header>
   <div class="tools rise" style="animation-delay:.18s">
     <label class="search">
       <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.5 15.5 5 5"/></svg>
-      <input id="q" type="search" placeholder="搜索教程，例如：提示词、Agent、本地部署" aria-label="搜索教程"/>
+      <input id="q" type="search" placeholder={copy.tutSearch} aria-label={copy.tutSearchLabel}/>
       <kbd class="mono" aria-hidden="true">/</kbd>
     </label>
-    <div class="tags"><button class="sd-chip on" data-tag="">全部</button>{tags.map(t => <button class="sd-chip" data-tag={t}>#{t}</button>)}</div>
+    <div class="tags"><button class="sd-chip on" data-tag="">{copy.tutAll}</button>{tags.map(t => <button class="sd-chip" data-tag={t}>#{t}</button>)}</div>
   </div>
-  <div id="list">{all.map((t, i) => <Card t={t} idx={all.length - i}/>)}</div>
-  <p id="empty" hidden>没有找到相关教程，换个关键词试试。</p>
+  <div id="list">{all.map((t, i) => <Card t={t} idx={all.length - i} lang={lang}/>)}</div>
+  <p id="empty" hidden>{copy.tutEmpty}</p>
 </section>
 </Base>
 <style>

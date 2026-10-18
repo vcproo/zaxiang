@@ -1,0 +1,8 @@
+---
+import Article from '../../tutorials/[id].astro';
+import { tutorialPaths } from '../../../lib';
+export async function getStaticPaths() {
+  return tutorialPaths('en');
+}
+---
+<Article {...Astro.props} />

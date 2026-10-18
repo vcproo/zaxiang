@@ -5,6 +5,11 @@ export default defineConfig({
   site: 'https://vcproo.github.io',
   base: '/zaxiang',
   trailingSlash: 'always',
+  i18n: {
+    defaultLocale: 'zh',
+    locales: ['zh', 'en'],
+    routing: { prefixDefaultLocale: false },
+  },
   output: 'static',
   vite: {
     server: {

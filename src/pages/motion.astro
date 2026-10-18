@@ -3,40 +3,43 @@ import { u } from '../url';
 import Base from '../layouts/Base.astro';
 import '../styles/style-motion.css';
 import fontwarm from '../data/style-fontwarm.html?raw';
+import { ui, langFromPath } from '../i18n';
+const lang = ((Astro.props.lang === 'en' || Astro.props.lang === 'zh') ? Astro.props.lang : langFromPath(Astro.url.pathname)) as 'zh' | 'en';
+const t = ui[lang];
 ---
-<Base title="动效档案" description="17 种画风和 34 个动效，用来对齐叫法、挑选气质、复制给 AI。">
+<Base lang={lang} title={t.motionTitle} description={t.motionDesc}>
   <link rel="stylesheet" href={u('/style-motion/fonts/fonts.css')}/>
   <section class="wrap motion-page page">
     <header class="page-head">
-      <p class="eyebrow rise">Motion archive / 动效档案</p>
-      <h1 class="rise" style="animation-delay:.06s">画风怎么叫，<br/>动效怎么动。</h1>
-      <p class="intro rise" style="animation-delay:.12s">做片子前先把叫法对齐。下面是 17 种能稳定做出来的画风，和 34 个拆到最小单元的动效。看中哪个，把那句话交给你的 AI。</p>
+      <p class="eyebrow rise">{t.motionEyebrow}</p>
+      <h1 class="rise" style="animation-delay:.06s">{t.motionH1a}<br/>{t.motionH1b}</h1>
+      <p class="intro rise" style="animation-delay:.12s">{t.motionIntro}</p>
     </header>
-    <div class="formula rise" style="animation-delay:.18s" aria-label="一句话说清一个镜头">
-      <div><code class="mono">01 · 画风</code><b>看起来像什么</b><span>暗场网格、蓝图、瑞士海报……</span></div>
-      <div><code class="mono">02 · 镜头</code><b>这镜完成什么任务</b><span>讲清关系、拆开零件、砸一个数字</span></div>
-      <div><code class="mono">03 · 动效</code><b>东西怎么动</b><span>砸字、描边生长、容器变形接力</span></div>
-      <p class="say"><span class="mono">一句话</span>这镜用<mark>蓝图</mark>，拆开<mark>一个零件</mark>，入场用<mark>描边生长</mark>。</p>
+    <div class="formula rise" style="animation-delay:.18s" aria-label={t.motionFormula}>
+      <div><code class="mono">01 · {lang === 'zh' ? '画风' : 'Look'}</code><b>{t.motionF1}</b><span>{t.motionF1s}</span></div>
+      <div><code class="mono">02 · {lang === 'zh' ? '镜头' : 'Shot'}</code><b>{t.motionF2}</b><span>{t.motionF2s}</span></div>
+      <div><code class="mono">03 · {lang === 'zh' ? '动效' : 'Motion'}</code><b>{t.motionF3}</b><span>{t.motionF3s}</span></div>
+      <p class="say"><span class="mono">{t.motionSay}</span><span set:html={lang === 'zh' ? '这镜用<mark>蓝图</mark>，拆开<mark>一个零件</mark>，入场用<mark>描边生长</mark>。' : 'This shot uses a <mark>blueprint</mark>, explodes <mark>one part</mark>, and enters with a <mark>stroke draw</mark>.'}></span></p>
     </div>
 
-    <div class="tabs" role="tablist" aria-label="档案分类">
-      <button type="button" class="seg-btn on" role="tab" id="tab-style" aria-controls="panel-style" aria-selected="true" data-tab="style">画风导览 · 17</button>
-      <button type="button" class="seg-btn" role="tab" id="tab-dict" aria-controls="panel-dict" aria-selected="false" data-tab="dict">动效词典 · 34</button>
+    <div class="tabs" role="tablist" aria-label={t.motionTabs}>
+      <button type="button" class="seg-btn on" role="tab" id="tab-style" aria-controls="panel-style" aria-selected="true" data-tab="style">{t.motionTabStyle}</button>
+      <button type="button" class="seg-btn" role="tab" id="tab-dict" aria-controls="panel-dict" aria-selected="false" data-tab="dict">{t.motionTabDict}</button>
     </div>
 
     <!-- 画风导览：原 styles.html，脚本在 public/style-motion/styles.js -->
     <div class="panel" id="panel-style" role="tabpanel" aria-labelledby="tab-style">
       <div class="panel-intro">
-        <p>17 种可以稳定做出来的画风。每种配一个它最擅长的场景，都是网页里实时画出来的。看中哪种，点开卡片复制那句「对 AI 这么说」，交给你自己的 AI，用这种画风做你自己的内容。<em>卡片里也写了适合讲什么、别用在哪、和谁容易混。</em></p>
-        <p class="aside">同一期可以按段落换两三种画风：开场用电影暗调，讲原理用蓝图，吐槽用新粗野。一整期只用一种，观众很快就看腻了。</p>
+        <p>{t.motionStyleP}<em>{t.motionStyleEm}</em></p>
+        <p class="aside">{t.motionStyleAside}</p>
       </div>
       <div class="sm-style">
-        <nav class="filters" id="filters" aria-label="按气质筛选"><span class="lab">按气质</span></nav>
-        <section id="sec-live"><div class="sec-head"><h2>已经在用</h2><p>我们正片里常用的四种</p></div><div class="grid" id="grid-live"></div></section>
-        <section id="sec-new"><div class="sec-head"><h2>新增</h2><p>能稳定做出来，还没在正片里用过</p></div><div class="grid" id="grid-new"></div></section>
+        <nav class="filters" id="filters" aria-label={t.motionMoodLabel}><span class="lab">{t.motionMood}</span></nav>
+        <section id="sec-live"><div class="sec-head"><h2>{t.motionLive}</h2><p>{t.motionLiveP}</p></div><div class="grid" id="grid-live"></div></section>
+        <section id="sec-new"><div class="sec-head"><h2>{t.motionNew}</h2><p>{t.motionNewP}</p></div><div class="grid" id="grid-new"></div></section>
         <dialog id="dlg" aria-labelledby="dlg-name">
           <div class="dlg-wrap">
-            <button class="close" id="dlg-close" aria-label="关闭">×</button>
+            <button class="close" id="dlg-close" aria-label={t.motionClose}>×</button>
             <div class="dlg">
               <div class="stage" id="dlg-stage"></div>
               <div class="info" id="dlg-info"></div>
@@ -46,9 +49,9 @@ import fontwarm from '../data/style-fontwarm.html?raw';
         <div class="fontwarm" aria-hidden="true" set:html={fontwarm}></div>
       </div>
       <div class="panel-foot sd-note">
-        <p>样张都是代码实时绘制，只用来展示气质。你的 AI 用同一种画风做别的内容，细节会不一样。</p>
-        <p>瑞士海报、数据新闻、蓝图里的数字和尺寸是示意数据；报纸拼贴里的年份和事件是真实的。</p>
-        <p>开启系统「减少动态效果」时，画风样张会停在代表性的一帧。</p>
+        <p>{t.motionStyleFoot1}</p>
+        <p>{t.motionStyleFoot2}</p>
+        <p>{t.motionStyleFoot3}</p>
       </div>
     </div>
 
@@ -56,26 +59,26 @@ import fontwarm from '../data/style-fontwarm.html?raw';
     <div class="panel" id="panel-dict" role="tabpanel" aria-labelledby="tab-dict" data-refs={u('/style-motion/refs')} hidden>
       <div class="sm-motion">
         <div class="panel-intro">
-          <p>宣传片里常见的 33 个动效，每个都拆到<b>最小单元</b>。看到想要的效果，把它调到对的手感，复制那一行调用码，发给 Claude 或者合作的动效师。这样大家说「甩镜」的时候，指的就是同一个东西、同一组数值。#21–#33 拆自 ElevenLabs Agents Architect 发布片，默认参数用的是逐帧量出来的原片数值。分类栏最后的「成片参考」是另外收来的成片短预览，用来对照，不是可调参数的最小单元。</p>
+          <p>{t.motionDictP}</p>
           <ol class="steps">
-            <li><b>放慢看。</b>切到 ¼× 或 0.1×，或者按 ◀ ▶ 一帧一帧走，看帧和帧之间到底发生了什么。</li>
-            <li><b>调参数。</b>拖滑杆改时长、曲线、强度。松手后会从头重播一次。</li>
-            <li><b>复制调用码。</b>一行文字，带编号和全部参数，直接发出去。也可以说「像 #10，但再慢一点」。</li>
+            <li><b>{t.motionStep1}</b>{t.motionStep1s}</li>
+            <li><b>{t.motionStep2}</b>{t.motionStep2s}</li>
+            <li><b>{t.motionStep3}</b>{t.motionStep3s}</li>
           </ol>
-          <p class="legend">名字旁边的标签说明这个叫法从哪来：<span class="term std">通用叫法</span>行业里本来就这么叫，拿去搜教程、跟别的设计师说都对得上；<span class="term en">英文通用</span>英文是通用叫法，中文是翻译过来的；<span class="term own">自拟叫法</span>原本没有统一说法，是这本词典起的名字。</p>
+          <p class="legend">{t.motionLegend}<span class="term std">{t.motionTermStd}</span>{t.motionTermStdS}<span class="term en">{t.motionTermEn}</span>{t.motionTermEnS}<span class="term own">{t.motionTermOwn}</span>{t.motionTermOwnS}</p>
         </div>
         <div class="bar">
-          <nav id="nav" aria-label="动效分类"></nav>
-          <div class="glob">全部速度
+          <nav id="nav" aria-label={t.motionCatNav}></nav>
+          <div class="glob">{t.motionAllSpeed}
             <div class="seg" id="gspeed"></div>
-            <button type="button" class="tbtn" id="gpause">全部暂停</button>
-            <button type="button" class="tbtn" id="gplay">全部播放</button>
+            <button type="button" class="tbtn" id="gpause">{t.motionPauseAll}</button>
+            <button type="button" class="tbtn" id="gplay">{t.motionPlayAll}</button>
           </div>
         </div>
         <div id="app"></div>
         <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs id="fxdefs"></defs></svg>
       </div>
-      <p class="panel-foot sd-note">时间按 30 帧/秒计。每个动效的帧数显示在播放条右边，比如「第 06 帧 / 13」表示整个动作 13 帧走完。舞台是 960×540 的逻辑画面，位移、震屏这些像素值都按这个尺寸算，放到 1920×1080 成片里要乘 2。</p>
+      <p class="panel-foot sd-note">{t.motionDictFoot}</p>
     </div>
   </section>
   <script is:inline>
@@ -96,6 +99,8 @@ import fontwarm from '../data/style-fontwarm.html?raw';
     addEventListener('hashchange', function () { if (location.hash === '#style' || DICT.indexOf(location.hash) >= 0) show(fromHash(), false); });
   })();
   </script>
+  {lang === 'en' && <script is:inline src={u('/style-motion/i18n-en.js')}></script>}
+  {lang === 'en' && <script is:inline src={u('/style-motion/refs/catalog-en.js')}></script>}
   <script is:inline defer src={u('/style-motion/lib/three.min.js')}></script>
   <script is:inline defer src={u('/style-motion/styles.js')}></script>
   <script is:inline defer src={u('/style-motion/motion.js')}></script>

@@ -2,14 +2,22 @@
 import { u } from '../url';
 import Base from '../layouts/Base.astro';
 import IpFigure from '../components/IpFigure.astro';
-import { SITE } from '../site';
-import { allTutorials } from '../lib';
-import { NODES, EDGES, GROUP_COLOR } from '../zhishi';
-import { skills } from '../skills';
-import { tips } from '../tips';
-import { tools } from '../tools';
+import { siteFor } from '../site';
+import { allTutorials, slugOf } from '../lib';
+import { graphFor, GROUP_COLOR } from '../zhishi';
+import { skillsFor } from '../skills';
+import { tipsFor } from '../tips';
+import { toolsFor } from '../tools';
+import { ui, langFromPath } from '../i18n';
 
-const all = await allTutorials();
+const lang = ((Astro.props.lang === 'en' || Astro.props.lang === 'zh') ? Astro.props.lang : langFromPath(Astro.url.pathname)) as 'zh' | 'en';
+const t = ui[lang];
+const SITE = siteFor(lang);
+const { NODES, EDGES } = graphFor(lang);
+const skills = skillsFor(lang);
+const tips = tipsFor(lang);
+const tools = toolsFor(lang);
+const all = await allTutorials(lang);
 const featured = (all.filter(t => t.data.featured).length ? all.filter(t => t.data.featured) : all).slice(0, 3);
 const tags = [...new Set(all.flatMap(t => t.data.tags))];
 const tagCount = (g: string) => all.filter(t => t.data.tags.includes(g)).length;
@@ -18,7 +26,7 @@ const lessons = NODES.filter(n => n.kind === 'lesson');
 // 背景里的「线索词」：确定性的伪随机散布，手电筒照到才看得清
 let seed = 7;
 const rnd = () => (seed = (seed * 9301 + 49297) % 233280) / 233280;
-const clueWords = [...NODES.map(n => n.label), ...NODES.map(n => n.caseId), 'CONTEXT', 'PROMPT', 'EVIDENCE', '线索', '推理', '证物'];
+const clueWords = [...NODES.map(n => n.label), ...NODES.map(n => n.caseId), 'CONTEXT', 'PROMPT', 'EVIDENCE', ...t.homeClues];
 const clues = clueWords.map((w, i) => ({
   w, x: (i % 6) * 16.5 + rnd() * 12, y: Math.floor(i / 6) * 16 + rnd() * 10 + 2,
   s: 12 + Math.round(rnd() * 12), r: Math.round((rnd() - .5) * 16),
@@ -43,7 +51,7 @@ const miniEdges = EDGES.filter(e => pos[e.from] && pos[e.to]);
 const miniNodes = NODES.filter(n => pos[n.id]);
 const caseNo = (o?: number) => `CASE-${String(o ?? 0).padStart(3, '0')}`;
 ---
-<Base>
+<Base lang={lang}>
 <section class="hero" data-hero>
   <div class="clues" aria-hidden="true">{clues.map(c => <span style={`left:${c.x}%;top:${c.y}%;font-size:${c.s}px;rotate:${c.r}deg`}>{c.w}</span>)}</div>
   <div class="clues lit" aria-hidden="true">{clues.map(c => <span style={`left:${c.x}%;top:${c.y}%;font-size:${c.s}px;rotate:${c.r}deg`}>{c.w}</span>)}</div>
@@ -51,65 +59,65 @@ const caseNo = (o?: number) => `CASE-${String(o ?? 0).padStart(3, '0')}`;
 
   <div class="wrap hero-in">
     <div class="hero-copy">
-      <p class="eyebrow live rise">CASE FILE · AI ／ 调查进行中</p>
-      <h1 class="hero-h rise" style="animation-delay:.08s">我是蜘蛛侦探，<br/><span id="tw">专门调查 <em class="hl">AI</em> 的人。</span><span class="caret" aria-hidden="true"></span></h1>
-      <p class="hero-lead rise" style="animation-delay:.16s">{SITE.tagline}这里收录我写过的 AI 教程与工具笔记：从提示词到 Agent，从本地模型到工作流，每一篇都能照着做出结果。</p>
+      <p class="eyebrow live rise">{t.homeEyebrow}</p>
+      <h1 class="hero-h rise" style="animation-delay:.08s">{t.homeH1a}<br/><span id="tw">{t.homeH1b}<em class="hl">AI</em>{t.homeH1c}</span><span class="caret" aria-hidden="true"></span></h1>
+      <p class="hero-lead rise" style="animation-delay:.16s">{SITE.tagline}{t.homeLeadTail}</p>
       <div class="hero-cta rise" style="animation-delay:.24s">
-        <a class="sd-btn" href={u("/tutorials/")}>开始读教程 <span class="arr">→</span></a>
-        <a class="sd-btn ghost" href={u("/about/")}>认识我</a>
+        <a class="sd-btn" href={u("/tutorials/", lang)}>{t.homeCta} <span class="arr">→</span></a>
+        <a class="sd-btn ghost" href={u("/about/", lang)}>{t.homeAbout}</a>
       </div>
       <ul class="hero-social rise" style="animation-delay:.32s">{SITE.socials.map(s => <li><a href={s.url}>{s.name}</a></li>)}</ul>
     </div>
     <div class="hero-stage rise" style="animation-delay:.12s">
-      <IpFigure variant="hero" src="/ip/character-hero.webp" alt="蜘蛛侦探：持放大镜与笔记本" width={540} height={707} caption="IP · SPIDER DETECTIVE" />
+      <IpFigure variant="hero" src="/ip/character-hero.webp" alt={t.homeAlt} width={540} height={707} caption={t.homeCap} />
       {evidence.map((n, i) => (
-        <a class={`ev ev${i}`} href={u(n.href!)}><i aria-hidden="true"></i><span class="mono">{n.caseId}</span><b>{n.label}</b></a>
+        <a class={`ev ev${i}`} href={u(n.href!, lang)}><i aria-hidden="true"></i><span class="mono">{n.caseId}</span><b>{n.label}</b></a>
       ))}
     </div>
   </div>
 
   <div class="wrap stats">
-    <div><b>{all.length}</b><span class="mono">篇教程</span></div>
-    <div><b>{NODES.length}</b><span class="mono">个知识节点</span></div>
-    <div><b>17</b><span class="mono">种画风</span></div>
-    <div><b>34</b><span class="mono">个动效</span></div>
+    <div><b>{all.length}</b><span class="mono">{t.homeLessons}</span></div>
+    <div><b>{NODES.length}</b><span class="mono">{t.homeNodes}</span></div>
+    <div><b>17</b><span class="mono">{t.homeStyles}</span></div>
+    <div><b>34</b><span class="mono">{t.homeMotions}</span></div>
   </div>
 </section>
 
-<div class="ticker" aria-label="十个 AI 热词">
+<div class="ticker" aria-label={t.homeTicker}>
   <div class="ticker-track">
     {[0, 1].map(k => lessons.map(n => (
-      <a href={u(n.href!)} tabindex={k ? -1 : undefined} aria-hidden={k ? 'true' : undefined}><span class="mono">{n.caseId}</span>{n.label}</a>
+      <a href={u(n.href!, lang)} tabindex={k ? -1 : undefined} aria-hidden={k ? 'true' : undefined}><span class="mono">{n.caseId}</span>{n.label}</a>
     )))}
   </div>
 </div>
 
 <section class="wrap block">
   <div class="sec-head reveal">
-    <div><p class="eyebrow">Start here</p><h2>从这里开始</h2></div>
-    <a href={u("/tutorials/")} class="more">全部 {all.length} 篇 →</a>
+    <div><p class="eyebrow">{t.homeStartEyebrow}</p><h2>{t.homeStart}</h2></div>
+    <a href={u("/tutorials/", lang)} class="more">{t.homeAll} {all.length}{t.homeAllUnit ? ` ${t.homeAllUnit}` : ''} →</a>
   </div>
   <div class="cases">
-    {featured.map((t, i) => (
-      <a class="case sd-card spot reveal" style={`--d:${i * .08}s`} href={u(`/tutorials/${t.id}/`)}>
-        <span class="case-no mono" aria-hidden="true">{String(t.data.order ?? i + 1).padStart(2, '0')}</span>
-        <span class="case-tab mono">{caseNo(t.data.order ?? i + 1)} · {t.data.level}</span>
-        <h3>{t.data.title}</h3>
-        <p>{t.data.description}</p>
-        <span class="case-foot"><span class="mono">{t.data.kicker ?? t.data.tags.at(-1)}</span><span class="go">阅读 <span>→</span></span></span>
+    {featured.map((item, i) => (
+      <a class="case sd-card spot reveal" style={`--d:${i * .08}s`} href={u(`/tutorials/${slugOf(item.id)}/`, lang)}>
+        <span class="case-no mono" aria-hidden="true">{String(item.data.order ?? i + 1).padStart(2, '0')}</span>
+        <span class="case-tab mono">{caseNo(item.data.order ?? i + 1)} · {item.data.level}</span>
+        <h3>{item.data.title}</h3>
+        <p>{item.data.description}</p>
+        <span class="case-foot"><span class="mono">{item.data.kicker ?? item.data.tags.at(-1)}</span><span class="go">{t.homeRead} <span>→</span></span></span>
       </a>
     ))}
   </div>
 </section>
 
 <section class="wrap block">
-  <div class="sec-head reveal"><div><p class="eyebrow">Archive room</p><h2>档案室</h2></div></div>
+  <div class="sec-head reveal"><div><p class="eyebrow">Archive room</p><h2>{t.homeArchive}</h2></div></div>
   <div class="bento">
-    <a class="b b-net sd-card spot reveal" href={u("/zhishi/")}>
+    <a class="b b-net sd-card spot reveal" href={u("/zhishi/", lang)}>
       <div class="b-copy">
         <p class="eyebrow">Graph · {NODES.length} nodes · {EDGES.length} edges</p>
-        <h3>知识网络</h3>
-        <p>侦办级知识图谱：把零散的 AI 线索连成可追踪的案情图。点选节点，沿邻域下钻至教程档案。</p>
+        <h3>{t.homeGraphH}</h3>
+        <p>{t.homeGraphP}</p>
         <span class="go mono">OPEN GRAPH →</span>
       </div>
       <svg class="mini" viewBox={`0 0 ${G.w} ${G.h}`} aria-hidden="true">
@@ -120,36 +128,36 @@ const caseNo = (o?: number) => `CASE-${String(o ?? 0).padStart(3, '0')}`;
         </g>
       </svg>
     </a>
-    <a class="b sd-card spot reveal" style="--d:.06s" href={u("/motion/")}>
+    <a class="b sd-card spot reveal" style="--d:.06s" href={u("/motion/", lang)}>
       <p class="eyebrow">Motion archive</p>
-      <h3>动效档案</h3>
-      <p>画风怎么叫，动效怎么动。看中哪个，把那句话交给你的 AI。</p>
-      <span class="b-num"><b>17</b><small class="mono">画风</small><b>34</b><small class="mono">动效</small></span>
+      <h3>{t.homeMotionH}</h3>
+      <p>{t.homeMotionP}</p>
+      <span class="b-num"><b>17</b><small class="mono">{t.homeStyleUnit}</small><b>34</b><small class="mono">{t.homeMotionUnit}</small></span>
     </a>
-    <a class="b sd-card spot reveal" style="--d:.12s" href={u("/skill/")}>
+    <a class="b sd-card spot reveal" style="--d:.12s" href={u("/skill/", lang)}>
       <p class="eyebrow">Skill archive</p>
-      <h3>Skill 档案</h3>
-      <p>{skills[0] ? `最新收录：${skills[0].name}——${skills[0].category}。` : '收录用过的 Agent Skill。'}</p>
-      <span class="b-num"><b>{skills.length}</b><small class="mono">个 Skill</small></span>
+      <h3>{t.homeSkillH}</h3>
+      <p>{skills[0] ? `${t.homeSkillLatest}: ${skills[0].name} — ${skills[0].category}` : t.homeSkillEmpty}</p>
+      <span class="b-num"><b>{skills.length}</b><small class="mono">{t.homeSkillUnit}</small></span>
     </a>
-    <a class="b sd-card spot reveal" style="--d:.06s" href={u("/tips/")}>
+    <a class="b sd-card spot reveal" style="--d:.06s" href={u("/tips/", lang)}>
       <p class="eyebrow">Field notes</p>
-      <h3>小技巧</h3>
-      <p>{tips[0] ? tips[0].title : '一句话就能用上的 AI 小技巧。'}</p>
-      <span class="b-num"><b>{tips.length}</b><small class="mono">条技巧</small></span>
+      <h3>{t.homeTipsH}</h3>
+      <p>{tips[0] ? tips[0].title : t.homeTipsEmpty}</p>
+      <span class="b-num"><b>{tips.length}</b><small class="mono">{t.homeTipsUnit}</small></span>
     </a>
-    <a class="b sd-card spot reveal" style="--d:.12s" href={u("/tools/")}>
+    <a class="b sd-card spot reveal" style="--d:.12s" href={u("/tools/", lang)}>
       <p class="eyebrow">Toolkit</p>
-      <h3>工具</h3>
-      <p>{tools[0] ? tools[0].name : '顺手的工具，放在这里。'}</p>
-      <span class="b-num"><b>{tools.length}</b><small class="mono">个工具</small></span>
+      <h3>{t.homeToolsH}</h3>
+      <p>{tools[0] ? tools[0].name : t.homeToolsEmpty}</p>
+      <span class="b-num"><b>{tools.length}</b><small class="mono">{t.homeToolsUnit}</small></span>
     </a>
   </div>
 </section>
 
 <section class="wrap block">
-  <div class="sec-head reveal"><div><p class="eyebrow">Open leads</p><h2>正在调查的线索</h2></div></div>
-  <div class="tags reveal">{tags.map(t => <a class="sd-chip" href={u(`/tutorials/?tag=${encodeURIComponent(t)}`)}>#{t}<span class="n">{tagCount(t)}</span></a>)}</div>
+  <div class="sec-head reveal"><div><p class="eyebrow">Open leads</p><h2>{t.homeLeads}</h2></div></div>
+  <div class="tags reveal">{tags.map(tag => <a class="sd-chip" href={u(`/tutorials/?tag=${encodeURIComponent(tag)}`, lang)}>#{tag}<span class="n">{tagCount(tag)}</span></a>)}</div>
 </section>
 </Base>
 

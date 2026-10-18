@@ -10397,7 +10397,7 @@ scene({
 (function () {
   const $ = s => document.querySelector(s);
   const el = (tag, cls, html) => { const e = document.createElement(tag); if (cls) e.className = cls; if (html != null) e.innerHTML = html; return e; };
-  const MOODS = ['科技', '克制', '温暖', '抓眼', '热闹', '怀旧', '手作', '电影感'];
+  let MOODS = ['科技', '克制', '温暖', '抓眼', '热闹', '怀旧', '手作', '电影感'];
   const cards = new Map(), grid = new Map();
   let fontsOk = false, modalStage = null, current = null;
 
@@ -10431,6 +10431,47 @@ scene({
     d.say = SAY[d.id] || d.name;
   });
 
+  const UI = window.SD_EN ? {
+    all: 'All',
+    house: (n) => `Called “${n}” in the workshop`,
+    say: 'Say this to the AI',
+    copy: 'Copy this line',
+    copied: 'Copied',
+    picked: 'Selected — press copy',
+    sample: 'Sample scene: ',
+    best: 'Best for',
+    avoid: 'Avoid for',
+    motions: 'Motions that fit',
+    tech: 'How it is made',
+    near: (a, b) => `Easy to mix up with <b>${a}</b>: ${b}.`,
+    example: 'How to describe the shot: ',
+    prev: 'Previous',
+    next: 'Next',
+  } : {
+    all: '全部',
+    house: (n) => `工作区里叫「${n}」`,
+    say: '对 AI 这么说',
+    copy: '复制这句',
+    copied: '已复制',
+    picked: '已选中，按复制键',
+    sample: '样张场景：',
+    best: '最适合',
+    avoid: '别用在',
+    motions: '搭配动效',
+    tech: '怎么做',
+    near: (a, b) => `容易和 <b>${a}</b> 混：${b}。`,
+    example: '描述镜头的例子：',
+    prev: '上一种',
+    next: '下一种',
+  };
+  if (window.SD_EN && window.SD_STYLE_EN) {
+    if (window.SD_MOODS) MOODS = window.SD_MOODS;
+    SCENES.forEach(d => {
+      const en = window.SD_STYLE_EN[d.id];
+      if (en) Object.assign(d, en);
+    });
+  }
+
   SCENES.forEach(d => {
     const b = el('button', 'card'); b.type = 'button'; b.dataset.id = d.id; b.setAttribute('aria-label', `${d.id} ${d.name}：${d.feel}`);
     const st = el('div', 'stage'); st.style.background = d.palette[0];
@@ -10442,15 +10483,15 @@ scene({
   });
 
   // 筛选
-  const fl = $('#filters'); let mood = '全部';
-  ['全部', ...MOODS].forEach(m => {
-    const n = m === '全部' ? SCENES.length : SCENES.filter(d => d.moods.includes(m)).length;
+  const fl = $('#filters'); let mood = UI.all;
+  [UI.all, ...MOODS].forEach(m => {
+    const n = m === UI.all ? SCENES.length : SCENES.filter(d => d.moods.includes(m)).length;
     const c = el('button', 'chip', `${m}<span class="n">${n}</span>`); c.type = 'button'; c.setAttribute('aria-pressed', m === mood);
     c.addEventListener('click', () => { mood = m; fl.querySelectorAll('.chip').forEach(x => x.setAttribute('aria-pressed', x === c)); applyFilter(); });
     fl.append(c);
   });
   function applyFilter() {
-    cards.forEach(({ btn, def }) => { btn.hidden = !(mood === '全部' || def.moods.includes(mood)); });
+    cards.forEach(({ btn, def }) => { btn.hidden = !(mood === UI.all || def.moods.includes(mood)); });
     ['live', 'new'].forEach(g => { $('#sec-' + g).hidden = ![...cards.values()].some(c => c.def.group === g && !c.btn.hidden); });
   }
 
@@ -10466,22 +10507,22 @@ scene({
   function infoHTML(d) {
     const i = SCENES.indexOf(d);
     return `<div class="top"><span class="num">${d.id} / 17</span><h2 id="dlg-name">${d.name}</h2><span class="en">${d.en}</span></div>
-      ${d.house ? `<p class="scn">工作区里叫「${d.house}」</p>` : ''}
-      <div class="callbox"><span class="k">对 AI 这么说</span><p id="call-text">${d.say}</p>
-        <div class="row"><button class="btn primary" id="copy">复制这句</button></div></div>
+      ${d.house ? `<p class="scn">${UI.house(d.house)}</p>` : ''}
+      <div class="callbox"><span class="k">${UI.say}</span><p id="call-text">${d.say}</p>
+        <div class="row"><button class="btn primary" id="copy">${UI.copy}</button></div></div>
       <p class="feel">${d.feel}</p>
-      <p class="scn">样张场景：${d.scene}</p>
+      <p class="scn">${UI.sample}${d.scene}</p>
       <div class="sw">${d.palette.map(c => `<span><i style="background:${c}"></i>${c}</span>`).join('')}</div>
       <dl>
-        <dt>最适合</dt><dd>${d.best}</dd>
-        <dt>别用在</dt><dd>${d.avoid}</dd>
-        <dt>搭配动效</dt><dd><div class="mo">${d.motions.map(m => `<span>${m}</span>`).join('')}</div></dd>
-        <dt>怎么做</dt><dd>${d.tech}</dd>
+        <dt>${UI.best}</dt><dd>${d.best}</dd>
+        <dt>${UI.avoid}</dt><dd>${d.avoid}</dd>
+        <dt>${UI.motions}</dt><dd><div class="mo">${d.motions.map(m => `<span>${m}</span>`).join('')}</div></dd>
+        <dt>${UI.tech}</dt><dd>${d.tech}</dd>
       </dl>
-      <div class="near">容易和 <b>${d.near[0]}</b> 混：${d.near[1]}。</div>
-      <p class="scn">描述镜头的例子：${d.call}</p>
+      <div class="near">${UI.near(d.near[0], d.near[1])}</div>
+      <p class="scn">${UI.example}${d.call}</p>
       <div class="row"><span class="spacer"></span>
-        <button class="btn" id="prev" ${i === 0 ? 'disabled' : ''}>上一种</button><button class="btn" id="next" ${i === SCENES.length - 1 ? 'disabled' : ''}>下一种</button></div>`;
+        <button class="btn" id="prev" ${i === 0 ? 'disabled' : ''}>${UI.prev}</button><button class="btn" id="next" ${i === SCENES.length - 1 ? 'disabled' : ''}>${UI.next}</button></div>`;
   }
 
   const dlg = $('#dlg');
@@ -10497,8 +10538,8 @@ scene({
     cards.forEach(c => { if (c.stage) c.stage.visible = false; });
     $('#copy').addEventListener('click', e => {
       const btn = e.currentTarget, txt = d.say;
-      const ok = () => { btn.textContent = '已复制'; setTimeout(() => (btn.textContent = '复制这句'), 1600); };
-      const fallback = () => { const r = document.createRange(); r.selectNodeContents($('#call-text')); const s = getSelection(); s.removeAllRanges(); s.addRange(r); btn.textContent = '已选中，按复制键'; };
+      const ok = () => { btn.textContent = UI.copied; setTimeout(() => (btn.textContent = UI.copy), 1600); };
+      const fallback = () => { const r = document.createRange(); r.selectNodeContents($('#call-text')); const s = getSelection(); s.removeAllRanges(); s.addRange(r); btn.textContent = UI.picked; };
       try { navigator.clipboard.writeText(txt).then(ok, fallback); } catch (_) { fallback(); }
     });
     const i = SCENES.indexOf(d);
